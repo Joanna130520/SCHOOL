@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>間接服務系統 (含細項目與個別學生分析版)</title>
+    <title>間接服務系統 (雙視角需求分析版)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js -->
@@ -164,7 +164,7 @@
                         </select>
                     </div>
 
-                    <!-- 間接服務類型 (大項 ➔ 細項 連動) -->
+                    <!-- 間接服務類型 -->
                     <div class="grid grid-cols-1 gap-3">
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 mb-1">間接服務類型 (主類別)</label>
@@ -179,7 +179,6 @@
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 mb-1">間接服務類型 (細項目)</label>
                             <select id="input-sub-type" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-[#7bb4e8] outline-none bg-white">
-                                <!-- 由 JS 動態渲染 -->
                             </select>
                         </div>
                     </div>
@@ -229,35 +228,59 @@
                     </div>
                 </div>
 
-                <!-- 🌟 升級功能：個別學生間接服務需求分析卡片 -->
+                <!-- 🌟 升級雙切換視角卡片：全校案件總表 VS 個別學生需求分析 -->
                 <div class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#e6748e]/40 p-5">
-                    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2 mb-4 border-b border-slate-100 pb-3">
-                        <h2 class="text-md font-bold text-slate-800 flex items-center gap-2">
-                            <i class="fa-solid fa-user-graduate text-[#e6748e]"></i>
-                            <span>個別學生間接服務需求分析 (下學期節數估算參照)</span>
-                        </h2>
-                        <select id="student-filter" onchange="renderIndividualStudentAnalysis()" class="px-3 py-1.5 border border-[#e6748e]/40 rounded-xl text-xs font-medium text-slate-700 focus:ring-2 focus:ring-[#e6748e] outline-none bg-white">
-                            <!-- 由 JS 動態生成學生選單 -->
-                        </select>
-                    </div>
-
-                    <div class="grid grid-cols-3 gap-3 mb-4">
-                        <div class="bg-rose-50 border border-rose-100 rounded-xl p-2.5 text-center">
-                            <div class="text-[11px] text-rose-600 font-medium">該生服務筆數</div>
-                            <div class="text-xl font-bold text-rose-700" id="stu-kpi-count">0</div>
+                    <!-- 標題與模式切換按鈕區 -->
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4 border-b border-slate-100 pb-3">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-users-viewfinder text-[#e6748e] text-lg"></i>
+                            <h2 class="text-md font-bold text-slate-800" id="analysis-card-title">學生間接服務需求分析</h2>
                         </div>
-                        <div class="bg-rose-50 border border-rose-100 rounded-xl p-2.5 text-center">
-                            <div class="text-[11px] text-rose-600 font-medium">累積服務時間</div>
-                            <div class="text-xl font-bold text-rose-700" id="stu-kpi-minutes">0 <span class="text-xs font-normal">分</span></div>
-                        </div>
-                        <div class="bg-rose-50 border border-rose-100 rounded-xl p-2.5 text-center">
-                            <div class="text-[11px] text-rose-600 font-medium">建議下學期需求</div>
-                            <div class="text-xl font-bold text-rose-700" id="stu-kpi-periods">0 <span class="text-xs font-normal">節</span></div>
+                        
+                        <!-- 雙按鈕切換開關 -->
+                        <div class="flex bg-slate-100 p-1 rounded-xl gap-1">
+                            <button type="button" id="btn-mode-all" onclick="switchAnalysisMode('all')" class="px-3 py-1 text-xs font-medium rounded-lg transition bg-[#e6748e] text-white shadow-sm">
+                                📊 全校學生總表
+                            </button>
+                            <button type="button" id="btn-mode-[#e6748e]" onclick="switchAnalysisMode('single')" class="px-3 py-1 text-xs font-medium rounded-lg transition text-slate-600 hover:text-slate-900">
+                                👤 個別學生案件
+                            </button>
                         </div>
                     </div>
 
-                    <div class="h-48 relative">
-                        <canvas id="chart-student-detail"></canvas>
+                    <!-- 模式 1：全校學生總覽說明 -->
+                    <div id="view-all-header" class="mb-3 text-xs text-slate-500 flex justify-between items-center">
+                        <span>顯示每位特教生累積之服務案件筆數與時間 (小時)</span>
+                        <span class="text-[#e6748e] font-semibold">作為全校整體需求輪廓參照</span>
+                    </div>
+
+                    <!-- 模式 2：個別學生控制項 (選單與KPI) -->
+                    <div id="view-single-controls" class="hidden mb-4">
+                        <div class="flex items-center justify-between mb-3 bg-rose-50/50 p-2.5 rounded-xl border border-rose-100">
+                            <span class="text-xs font-bold text-slate-700">選擇分析對象：</span>
+                            <select id="student-filter" onchange="renderAnalysisChart()" class="px-3 py-1.5 border border-[#e6748e]/40 rounded-xl text-xs font-medium text-slate-700 focus:ring-2 focus:ring-[#e6748e] outline-none bg-white">
+                            </select>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-3">
+                            <div class="bg-rose-50 border border-rose-100 rounded-xl p-2 text-center">
+                                <div class="text-[10px] text-rose-600 font-medium">該生服務筆數</div>
+                                <div class="text-lg font-bold text-rose-700" id="stu-kpi-count">0</div>
+                            </div>
+                            <div class="bg-rose-50 border border-rose-100 rounded-xl p-2 text-center">
+                                <div class="text-[10px] text-rose-600 font-medium">累積服務時間</div>
+                                <div class="text-lg font-bold text-rose-700" id="stu-kpi-minutes">0 <span class="text-xs font-normal">分</span></div>
+                            </div>
+                            <div class="bg-rose-50 border border-rose-100 rounded-xl p-2 text-center">
+                                <div class="text-[10px] text-rose-600 font-medium">建議下學期需求</div>
+                                <div class="text-lg font-bold text-rose-700" id="stu-kpi-periods">0 <span class="text-xs font-normal">節</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 動態圖表區 -->
+                    <div class="h-52 relative">
+                        <canvas id="chart-analysis"></canvas>
                     </div>
                 </div>
 
@@ -324,7 +347,6 @@
     <script>
         const TARGET_PASSWORD = "1234";
 
-        // 主類別與細項目對照字典
         const SERVICE_MAP = {
             "需求評估與處理": ["資料管理", "學習評估", "輔具使用", "專團服務", "同儕支持", "轉銜輔導"],
             "個別晤談與指導": ["個別晤談", "團體晤談", "學習指導"],
@@ -359,6 +381,7 @@
         let selectedPeriods = [];
         let selectedStudents = [];
         let chartInstances = {};
+        let currentAnalysisMode = 'all'; // 'all' (全校總表) or 'single' (個別學生)
 
         function checkPassword() {
             const input = document.getElementById('pwd-input').value;
@@ -404,7 +427,6 @@
             localStorage.setItem('school_service_records_v3', JSON.stringify(records));
         }
 
-        // 下拉選單主類別變更時，自動更新細項目
         function updateSubTypes() {
             const mainType = document.getElementById('input-main-type').value;
             const subTypeSelect = document.getElementById('input-sub-type');
@@ -526,6 +548,28 @@
             }
         }
 
+        // 切換分析模式邏輯 (全校總表 vs 個別學生)
+        function switchAnalysisMode(mode) {
+            currentAnalysisMode = mode;
+            const btnAll = document.getElementById('btn-mode-all');
+            const btnSingle = document.getElementById('btn-mode-[#e6748e]');
+            const headerAll = document.getElementById('view-all-header');
+            const controlsSingle = document.getElementById('view-single-controls');
+
+            if (mode === 'all') {
+                btnAll.className = "px-3 py-1 text-xs font-medium rounded-lg transition bg-[#e6748e] text-white shadow-sm";
+                btnSingle.className = "px-3 py-1 text-xs font-medium rounded-lg transition text-slate-600 hover:text-slate-900";
+                headerAll.classList.remove('hidden');
+                controlsSingle.classList.add('hidden');
+            } else {
+                btnSingle.className = "px-3 py-1 text-xs font-medium rounded-lg transition bg-[#e6748e] text-white shadow-sm";
+                btnAll.className = "px-3 py-1 text-xs font-medium rounded-lg transition text-slate-600 hover:text-slate-900";
+                headerAll.classList.add('hidden');
+                controlsSingle.classList.remove('hidden');
+            }
+            renderAnalysisChart();
+        }
+
         function renderApp() {
             records.sort((a, b) => new Date(a.date) - new Date(b.date));
 
@@ -550,43 +594,80 @@
                 </tr>
             `).join('');
 
-            renderIndividualStudentAnalysis();
+            renderAnalysisChart();
             renderCharts(records);
         }
 
-        // 🌟 個別學生分析渲染邏輯
-        function renderIndividualStudentAnalysis() {
-            const selectedStu = document.getElementById('student-filter').value;
-            const stuRecords = records.filter(r => r.students.includes(selectedStu));
+        // 🌟 渲染分析圖表 (全校總表 / 個別學生 雙模態)
+        function renderAnalysisChart() {
+            if (chartInstances.analysisChart) chartInstances.analysisChart.destroy();
 
-            const totalMins = stuRecords.reduce((sum, r) => sum + r.minutes, 0);
-            const totalPeriods = Math.ceil(totalMins / 60);
+            if (currentAnalysisMode === 'all') {
+                // 1. 全校各學生案件筆數與時數統計
+                const studentStats = {};
+                STUDENT_LIST.forEach(s => studentStats[s] = { count: 0, hours: 0 });
 
-            document.getElementById('stu-kpi-count').innerText = stuRecords.length;
-            document.getElementById('stu-kpi-minutes').innerText = totalMins;
-            document.getElementById('stu-kpi-periods').innerText = totalPeriods;
+                records.forEach(r => {
+                    STUDENT_LIST.forEach(s => {
+                        if (r.students.includes(s)) {
+                            studentStats[s].count += 1;
+                            studentStats[s].hours += (r.minutes / 60);
+                        }
+                    });
+                });
 
-            // 統計該生在各「細項目」的頻率
-            const subTypeCounts = {};
-            stuRecords.forEach(r => {
-                const label = r.subType ? `${r.mainType}-${r.subType}` : r.mainType;
-                subTypeCounts[label] = (subTypeCounts[label] || 0) + 1;
-            });
+                // 只篩選有次數的學生以利畫面簡潔
+                const activeStudents = STUDENT_LIST.filter(s => studentStats[s].count > 0);
+                const counts = activeStudents.map(s => studentStats[s].count);
+                const hours = activeStudents.map(s => studentStats[s].hours.toFixed(1));
 
-            if (chartInstances.studentDetail) chartInstances.studentDetail.destroy();
+                chartInstances.analysisChart = new Chart(document.getElementById('chart-analysis'), {
+                    type: 'bar',
+                    data: {
+                        labels: activeStudents.map(s => s.split(' ')[1] || s),
+                        datasets: [
+                            { label: '案件筆數', data: counts, backgroundColor: '#e6748e', borderRadius: 4 },
+                            { label: '總時數(小時)', data: hours, backgroundColor: '#7bb4e8', borderRadius: 4 }
+                        ]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false, animation: false,
+                        plugins: { legend: { display: true, position: 'top' } },
+                        scales: { y: { beginAtZero: true }, x: { ticks: { font: { size: 10 } } } }
+                    }
+                });
 
-            chartInstances.studentDetail = new Chart(document.getElementById('chart-student-detail'), {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(subTypeCounts),
-                    datasets: [{ label: '需求次數', data: Object.values(subTypeCounts), backgroundColor: '#e6748e', borderRadius: 4 }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false, animation: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } }, x: { ticks: { font: { size: 10 } } } }
-                }
-            });
+            } else {
+                // 2. 個別學生詳細需求細項目分析
+                const selectedStu = document.getElementById('student-filter').value;
+                const stuRecords = records.filter(r => r.students.includes(selectedStu));
+
+                const totalMins = stuRecords.reduce((sum, r) => sum + r.minutes, 0);
+                const totalPeriods = Math.ceil(totalMins / 60);
+
+                document.getElementById('stu-kpi-count').innerText = stuRecords.length;
+                document.getElementById('stu-kpi-minutes').innerText = totalMins;
+                document.getElementById('stu-kpi-periods').innerText = totalPeriods;
+
+                const subTypeCounts = {};
+                stuRecords.forEach(r => {
+                    const label = r.subType ? `${r.mainType}-${r.subType}` : r.mainType;
+                    subTypeCounts[label] = (subTypeCounts[label] || 0) + 1;
+                });
+
+                chartInstances.analysisChart = new Chart(document.getElementById('chart-analysis'), {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(subTypeCounts),
+                        datasets: [{ label: '需求次數', data: Object.values(subTypeCounts), backgroundColor: '#e6748e', borderRadius: 4 }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false, animation: false,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } }, x: { ticks: { font: { size: 10 } } } }
+                    }
+                });
+            }
         }
 
         function renderCharts(data) {
@@ -692,7 +773,7 @@
             link.click();
         }
 
-        // 匯出 Word 簽核報表 (含細項目欄位)
+        // 匯出 Word 簽核報表
         function exportWord() {
             let rows = records.map(r => `
                 <tr>
