@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>間接服務系統 (字型12pt版)</title>
+    <title>間接服務系統 (含細項目與個別學生分析版)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js -->
@@ -59,7 +59,7 @@
         </div>
     </div>
 
-    <!-- 📱 主要系統區域 (預設隱藏，解鎖後顯示) -->
+    <!-- 📱 主要系統區域 -->
     <div id="main-app" class="hidden">
         <!-- 導覽列 -->
         <nav class="bg-[#4a90e2] text-white shadow-sm sticky top-0 z-50">
@@ -164,16 +164,24 @@
                         </select>
                     </div>
 
-                    <!-- 間接服務類型 -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">間接服務類型</label>
-                        <select id="input-type" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-[#7bb4e8] outline-none bg-white">
-                            <option value="需求評估與處理(資料管理/學習評估/輔具使用/專團服務/同儕支持/轉銜輔導)">需求評估與處理(資料管理/學習評估/輔具使用/專團服務/同儕支持/轉銜輔導)</option>
-                            <option value="個別晤談與指導(個別晤談/團體晤談/學習指導)">個別晤談與指導(個別晤談/團體晤談/學習指導)</option>
-                            <option value="諮詢服務(特教諮詢/課調諮詢/班級經營)">諮詢服務(特教諮詢/課調諮詢/班級經營)</option>
-                            <option value="入班協助(入班觀察/行為功能介入方案/SWPBS/UDL/SEL)">入班協助(入班觀察/行為功能介入方案/SWPBS/UDL/SEL)</option>
-                            <option value="其他(助理員/突發事件/融合教育宣導/校外教學)">其他(助理員/突發事件/融合教育宣導/校外教學)</option>
-                        </select>
+                    <!-- 間接服務類型 (大項 ➔ 細項 連動) -->
+                    <div class="grid grid-cols-1 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">間接服務類型 (主類別)</label>
+                            <select id="input-main-type" onchange="updateSubTypes()" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-[#7bb4e8] outline-none bg-white">
+                                <option value="需求評估與處理">需求評估與處理</option>
+                                <option value="個別晤談與指導">個別晤談與指導</option>
+                                <option value="諮詢服務">諮詢服務</option>
+                                <option value="入班協助">入班協助</option>
+                                <option value="其他">其他</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">間接服務類型 (細項目)</label>
+                            <select id="input-sub-type" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-[#7bb4e8] outline-none bg-white">
+                                <!-- 由 JS 動態渲染 -->
+                            </select>
+                        </div>
                     </div>
 
                     <!-- 服務內容摘要 -->
@@ -196,18 +204,18 @@
             <!-- 右側：統計報表與紀錄清單 -->
             <section class="lg:col-span-7 space-y-6">
 
-                <!-- KPI 卡片 -->
+                <!-- 全校總體 KPI 卡片 -->
                 <div class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#7bb4e8]/30 p-5">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
                             <i class="fa-solid fa-chart-pie text-[#4a90e2]"></i>
-                            <span id="kpi-title">每月服務統計</span>
+                            <span>全校服務總體統計</span>
                         </h2>
                     </div>
 
                     <div class="grid grid-cols-3 gap-3">
                         <div class="bg-[#d6e8fa]/60 border border-[#7bb4e8]/30 rounded-xl p-3 text-center">
-                            <div class="text-xs text-[#3b72b0] font-medium mb-1">本月總筆數</div>
+                            <div class="text-xs text-[#3b72b0] font-medium mb-1">總服務筆數</div>
                             <div class="text-2xl font-black text-[#3b72b0]" id="kpi-count">0</div>
                         </div>
                         <div class="bg-[#e5a9a9]/30 border border-[#e5a9a9]/50 rounded-xl p-3 text-center">
@@ -221,9 +229,40 @@
                     </div>
                 </div>
 
+                <!-- 🌟 升級功能：個別學生間接服務需求分析卡片 -->
+                <div class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#e6748e]/40 p-5">
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2 mb-4 border-b border-slate-100 pb-3">
+                        <h2 class="text-md font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-user-graduate text-[#e6748e]"></i>
+                            <span>個別學生間接服務需求分析 (下學期節數估算參照)</span>
+                        </h2>
+                        <select id="student-filter" onchange="renderIndividualStudentAnalysis()" class="px-3 py-1.5 border border-[#e6748e]/40 rounded-xl text-xs font-medium text-slate-700 focus:ring-2 focus:ring-[#e6748e] outline-none bg-white">
+                            <!-- 由 JS 動態生成學生選單 -->
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-3 mb-4">
+                        <div class="bg-rose-50 border border-rose-100 rounded-xl p-2.5 text-center">
+                            <div class="text-[11px] text-rose-600 font-medium">該生服務筆數</div>
+                            <div class="text-xl font-bold text-rose-700" id="stu-kpi-count">0</div>
+                        </div>
+                        <div class="bg-rose-50 border border-rose-100 rounded-xl p-2.5 text-center">
+                            <div class="text-[11px] text-rose-600 font-medium">累積服務時間</div>
+                            <div class="text-xl font-bold text-rose-700" id="stu-kpi-minutes">0 <span class="text-xs font-normal">分</span></div>
+                        </div>
+                        <div class="bg-rose-50 border border-rose-100 rounded-xl p-2.5 text-center">
+                            <div class="text-[11px] text-rose-600 font-medium">建議下學期需求</div>
+                            <div class="text-xl font-bold text-rose-700" id="stu-kpi-periods">0 <span class="text-xs font-normal">節</span></div>
+                        </div>
+                    </div>
+
+                    <div class="h-48 relative">
+                        <canvas id="chart-student-detail"></canvas>
+                    </div>
+                </div>
+
                 <!-- 圖表區 -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    
                     <div class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#7bb4e8]/30 p-4">
                         <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">服務對象分布</h3>
                         <div class="h-56 relative">
@@ -233,7 +272,7 @@
                     </div>
 
                     <div class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#7bb4e8]/30 p-4">
-                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">間接服務類型統計</h3>
+                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">間接服務主類別統計</h3>
                         <div class="h-64 relative">
                             <canvas id="chart-type"></canvas>
                         </div>
@@ -268,6 +307,7 @@
                                     <th class="p-2.5">地點</th>
                                     <th class="p-2.5">時間</th>
                                     <th class="p-2.5">人員/對象</th>
+                                    <th class="p-2.5">服務大項/細項</th>
                                     <th class="p-2.5">摘要</th>
                                     <th class="p-2.5 text-center">操作</th>
                                 </tr>
@@ -282,8 +322,43 @@
     </div>
 
     <script>
-        // 🔑 預設密碼設定：您可以改為自己設定的密碼
         const TARGET_PASSWORD = "1234";
+
+        // 主類別與細項目對照字典
+        const SERVICE_MAP = {
+            "需求評估與處理": ["資料管理", "學習評估", "輔具使用", "專團服務", "同儕支持", "轉銜輔導"],
+            "個別晤談與指導": ["個別晤談", "團體晤談", "學習指導"],
+            "諮詢服務": ["特教諮詢", "課調諮詢", "班級經營"],
+            "入班協助": ["入班觀察", "行為功能介入方案", "SWPBS", "UDL", "SEL"],
+            "其他": ["助理員", "突發事件", "融合教育宣導", "校外教學"]
+        };
+
+        const STUDENT_LIST = ["102 陳O芯", "104 許O棠", "106 許O瑀", "108 黃O瑞", "110 蔡O昌", "111 陳O豪", "113 張O峻", "114 巫O升", "201 劉O兆", "207 洪O恩", "209 鄭O煜", "215 張O恩", "301 廖O宇", "303 吳O誠", "304 吳O恩", "307 陳O禎", "311 黃O甫", "314 卓O諺", "314 鍾O軒", "315 戴O承", "315 林O成", "315 賴O睿", "315 鍾O靖"];
+
+        const PALETTE = ['#4a90e2', '#7bb4e8', '#e5a9a9', '#e6748e', '#9b51e0', '#f2994a', '#56ccf2', '#bb6bd9'];
+
+        const INITIAL_DATA = [
+            { id: "1", date: "2026/10/01", period: "第一節, 第二節, 第三節", place: "多元教室", minutes: 180, students: "108 黃O瑞, 201 劉O兆, 311 黃O甫", target: "專業團隊 (物理治療、心理治療、職能治療、語言治療)", mainType: "需求評估與處理", subType: "專團服務", summary: "職能治療課程" },
+            { id: "2", date: "2026/10/05", period: "第六節", place: "多元教室", minutes: 60, students: "106 許O瑀", target: "資源班學生", mainType: "個別晤談與指導", subType: "個別晤談", summary: "國中時期曾有遭受同學霸凌的經驗，對向師長求助有所顧慮。" },
+            { id: "3", date: "2026/10/06", period: "第六節, 第七節", place: "多元教室", minutes: 120, students: "113 張O峻, 201 劉O兆", target: "專業團隊 (物理治療、心理治療、職能治療、語言治療)", mainType: "需求評估與處理", subType: "專團服務", summary: "語言治療課程" },
+            { id: "4", date: "2026/10/12", period: "第六節, 第七節", place: "多元教室", minutes: 120, students: "113 張O峻, 201 劉O兆", target: "專業團隊 (物理治療、心理治療、職能治療、語言治療)", mainType: "需求評估與處理", subType: "專團服務", summary: "語言治療課程" },
+            { id: "5", date: "2026/10/22", period: "第六節, 第七節", place: "多元教室", minutes: 120, students: "104 許O棠, 110 蔡O昌", target: "專業團隊 (物理治療、心理治療、職能治療、語言治療)", mainType: "需求評估與處理", subType: "專團服務", summary: "語言治療課程" },
+            { id: "6", date: "2026/10/19", period: "第三節", place: "多元教室", minutes: 60, students: "102 陳O芯", target: "專業團隊 (物理治療、心理治療、職能治療、語言治療)", mainType: "需求評估與處理", subType: "專團服務", summary: "物理治療課程" },
+            { id: "7", date: "2026/10/22", period: "第二節, 第三節, 第四節", place: "第三會議室 6F", minutes: 180, students: "108 黃O瑞, 201 劉O兆", target: "普通班學生", mainType: "其他", subType: "融合教育宣導", summary: "入班宣導_國立彰化師範大學教授 - 洪雅惠教授" },
+            { id: "8", date: "2026/10/29", period: "第二節, 第三節, 第四節", place: "第三會議室 6F", minutes: 180, students: "102 陳O芯, 207 洪O恩, 209 鄭O煜", target: "普通班學生", mainType: "其他", subType: "融合教育宣導", summary: "入班宣導_國立彰化師範大學教授 - 林千惠教授" },
+            { id: "9", date: "2026/10/27", period: "第二節, 第三節", place: "校園參觀", minutes: 120, students: "鹿港國中", target: "鹿港國中特殊學生及老師及家長", mainType: "諮詢服務", subType: "特教諮詢", summary: "鹿港國中特教班師生蒞校參訪及轉銜諮詢。" },
+            { id: "10", date: "2026/10/14", period: "第六節, 第七節, 第八節", place: "第三會議室 6F", minutes: 180, students: "全校老師", target: "普通班導師/教師", mainType: "其他", subType: "融合教育宣導", summary: "115學年度第1學期全校教師特教知能研習" },
+            { id: "11", date: "2026/10/07", period: "第五節, 第六節", place: "多元教室", minutes: 120, students: "蔣O美老師", target: "普通班導師/教師", mainType: "諮詢服務", subType: "課調諮詢", summary: "討論特殊生個別化教學與評量相關事宜。" },
+            { id: "12", date: "2026/10/07", period: "第七節", place: "多元教室", minutes: 60, students: "113 張O峻, 范老師", target: "普通班導師/教師", mainType: "諮詢服務", subType: "課調諮詢", summary: "討論特殊生個別化教學與評量相關事宜" },
+            { id: "13", date: "2026/10/19", period: "中午, 第五節", place: "多元教室", minutes: 120, students: "307 陳O禎", target: "資源班學生", mainType: "個別晤談與指導", subType: "個別晤談", summary: "陳生因寵物過世尋求晤談與心理支持。" },
+            { id: "14", date: "2026/10/13", period: "第八節", place: "個諮室", minutes: 60, students: "315 林O成", target: "資源班學生", mainType: "個別晤談與指導", subType: "學習指導", summary: "了解林生生涯規劃與目標設定。" },
+            { id: "15", date: "2026/10/14", period: "第五節", place: "學務處", minutes: 60, students: "301 廖O宇, 301 廖O宇媽媽", target: "資源班學生", mainType: "個別晤談與指導", subType: "個別晤談", summary: "廖生出缺勤與作息討論三方晤談。" }
+        ];
+
+        let records = [];
+        let selectedPeriods = [];
+        let selectedStudents = [];
+        let chartInstances = {};
 
         function checkPassword() {
             const input = document.getElementById('pwd-input').value;
@@ -310,40 +385,8 @@
             }
         });
 
-        // 原有系統邏輯區塊
-        const PALETTE = ['#4a90e2', '#7bb4e8', '#e5a9a9', '#e6748e', '#9b51e0', '#f2994a', '#56ccf2', '#bb6bd9'];
-
-        const INITIAL_DATA = [
-            { id: "1", date: "2026/10/01", period: "第一節, 第二節, 第三節", place: "多元教室", minutes: 180, students: "108 黃O瑞, 201 劉O兆, 311 黃O甫", target: "專業團隊 (物理治療、心理治療、職能治療、語言治療)", type: "需求評估與處理(資料管理/學習評估/輔具使用/專團服務/同儕支持/轉銜輔導)", summary: "職能治療課程" },
-            { id: "2", date: "2026/10/05", period: "第六節", place: "多元教室", minutes: 60, students: "106 許O瑀", target: "資源班學生", type: "個別晤談與指導(個別晤談/團體晤談/學習指導)", summary: "國中時期曾有遭受同學霸凌的經驗，當時雖曾向老師反映，但相關情況未獲得妥善處理，因此在面對目前的人際互動問題時，較容易感到心慌與不安，也對向師長求助有所顧慮。" },
-            { id: "3", date: "2026/10/06", period: "第六節, 第七節", place: "多元教室", minutes: 120, students: "113 張O峻, 201 劉O兆", target: "專業團隊 (物理治療、心理治療、職能治療、語言治療)", type: "需求評估與處理(資料管理/學習評估/輔具使用/專團服務/同儕支持/轉銜輔導)", summary: "語言治療課程" },
-            { id: "4", date: "2026/10/12", period: "第六節, 第七節", place: "多元教室", minutes: 120, students: "113 張O峻, 201 劉O兆", target: "專業團隊 (物理治療、心理治療、職能治療、語言治療)", type: "需求評估與處理(資料管理/學習評估/輔具使用/專團服務/同儕支持/轉銜輔導)", summary: "語言治療課程" },
-            { id: "5", date: "2026/10/22", period: "第六節, 第七節", place: "多元教室", minutes: 120, students: "104 許O棠, 110 蔡O昌", target: "專業團隊 (物理治療、心理治療、職能治療、語言治療)", type: "需求評估與處理(資料管理/學習評估/輔具使用/專團服務/同儕支持/轉銜輔導)", summary: "語言治療課程" },
-            { id: "6", date: "2026/10/19", period: "第三節", place: "多元教室", minutes: 60, students: "102 陳O芯", target: "專業團隊 (物理治療、心理治療、職能治療、語言治療)", type: "需求評估與處理(資料管理/學習評估/輔具使用/專團服務/同儕支持/轉銜輔導)", summary: "物理治療課程" },
-            { id: "7", date: "2026/10/22", period: "第二節, 第三節, 第四節", place: "第三會議室 6F", minutes: 180, students: "108、201班同學", target: "普通班學生", type: "其他(助理員/突發事件/融合教育宣導/校外教學)", summary: "入班宣導_國立彰化師範大學教授 - 洪雅惠教授" },
-            { id: "8", date: "2026/10/29", period: "第二節, 第三節, 第四節", place: "第三會議室 6F", minutes: 180, students: "102、207、209班同學", target: "普通班學生", type: "其他(助理員/突發事件/融合教育宣導/校外教學)", summary: "入班宣導_國立彰化師範大學教授 - 林千惠教授" },
-            { id: "9", date: "2026/10/27", period: "第二節, 第三節", place: "校園參觀", minutes: 120, students: "鹿港國中", target: "鹿港國中特殊學生及老師及家長", type: "諮詢服務(特教諮詢/課調諮詢/班級經營)", summary: "彰化縣立鹿港國中特教班師生及家長於本日蒞校參訪，活動安排校園無障礙環境導覽、適性實習課程體驗及升學轉銜諮詢，協助學生實地認識學習環境，並解答家長有關安置與支持服務之疑問。" },
-            { id: "10", date: "2026/10/14", period: "第六節, 第七節, 第八節", place: "第三會議室 6F", minutes: 180, students: "全校老師", target: "普通班導師/教師", type: "其他(助理員/突發事件/融合教育宣導/校外教學)", summary: "115學年度第1學期全校教師特教知能研習" },
-            { id: "11", date: "2026/10/07", period: "第五節, 第六節", place: "多元教室", minutes: 120, students: "蔣O美老師", target: "普通班導師/教師", type: "諮詢服務(特教諮詢/課調諮詢/班級經營)", summary: "討論特殊生個別化教學與評量相關事宜。" },
-            { id: "12", date: "2026/10/07", period: "第七節", place: "多元教室", minutes: 60, students: "113 張O峻, 范老師", target: "普通班導師/教師", type: "諮詢服務(特教諮詢/課調諮詢/班級經營)", summary: "討論特殊生個別化教學與評量相關事宜" },
-            { id: "13", date: "2026/10/19", period: "中午, 第五節", place: "多元教室", minutes: 120, students: "307 陳O禎", target: "資源班學生", type: "個別晤談與指導(個別晤談/團體晤談/學習指導)", summary: "陳生因阿嬤陪伴10年的愛犬過世，內心十分難過與不捨，特前來尋求晤談與心理支持。" },
-            { id: "14", date: "2026/10/13", period: "第八節", place: "個諮室", minutes: 60, students: "315 林O成", target: "資源班學生", type: "個別晤談與指導(個別晤談/團體晤談/學習指導)", summary: "了解林生對未來的想法與生涯規劃，過程中深入探討其個人的興趣、優勢以及對未來發展的期待，並協助其釐清可行目標與具體實踐步驟，鼓勵林生建立自主規劃的能力，後續將持續追蹤其目標執行狀況，提供相應的資源與引導。" },
-            { id: "15", date: "2026/10/14", period: "第五節", place: "學務處", minutes: 60, students: "301 廖O宇, 301 廖O宇媽媽", target: "資源班學生", type: "個別晤談與指導(個別晤談/團體晤談/學習指導)", summary: "廖生近期因缺曠課過多及上課時間嚴重睡覺問題，由家長至校協助處理缺曠課與愛校服務相關事宜，並進行三方晤談，晤談過程中，與家長共同釐清學生的生活作息與出缺勤狀況，並針對其未來的學習與生涯規劃進行深入討論，後續將持續追蹤學生的課堂參與及作息改善情形，並與家長保持聯繫，共同引導學生建立穩定的學習習慣。" }
-        ];
-
-        const STUDENT_LIST = ["102 陳O芯", "104 許O棠", "106 許O瑀", "108 黃O瑞", "110 蔡O昌", "111 陳O豪", "113 張O峻", "114 巫O升", "201 劉O兆", "207 洪O恩", "209 鄭O煜", "215 張O恩", "301 廖O宇", "303 吳O誠", "304 吳O恩", "307 陳O禎", "311 黃O甫", "314 卓O諺", "314 鍾O軒", "315 戴O承", "315 林O成", "315 賴O睿", "315 鍾O靖"];
-
-        let records = [];
-        let selectedPeriods = [];
-        let selectedStudents = [];
-        let chartInstances = {};
-
-        function toVerticalText(labels) {
-            return labels.map(str => str.split(''));
-        }
-
         function initApp() {
-            const saved = localStorage.getItem('school_service_records_v2');
+            const saved = localStorage.getItem('school_service_records_v3');
             if (saved) {
                 records = JSON.parse(saved);
             } else {
@@ -351,12 +394,22 @@
                 saveData();
             }
             document.getElementById('input-date').valueAsDate = new Date();
+            updateSubTypes();
             renderStudentChips();
+            renderStudentFilterOptions();
             renderApp();
         }
 
         function saveData() {
-            localStorage.setItem('school_service_records_v2', JSON.stringify(records));
+            localStorage.setItem('school_service_records_v3', JSON.stringify(records));
+        }
+
+        // 下拉選單主類別變更時，自動更新細項目
+        function updateSubTypes() {
+            const mainType = document.getElementById('input-main-type').value;
+            const subTypeSelect = document.getElementById('input-sub-type');
+            const subOptions = SERVICE_MAP[mainType] || [];
+            subTypeSelect.innerHTML = subOptions.map(sub => `<option value="${sub}">${sub}</option>`).join('');
         }
 
         function renderStudentChips() {
@@ -367,6 +420,11 @@
                     <span class="truncate">${name}</span>
                 </label>
             `).join('');
+        }
+
+        function renderStudentFilterOptions() {
+            const filterSelect = document.getElementById('student-filter');
+            filterSelect.innerHTML = STUDENT_LIST.map(s => `<option value="${s}">${s}</option>`).join('');
         }
 
         function toggleStudent(name) {
@@ -406,6 +464,7 @@
             selectedStudents = [];
             document.querySelectorAll('.chip').forEach(c => c.classList.remove('chip-active'));
             document.querySelectorAll('#student-chips input').forEach(i => i.checked = false);
+            updateSubTypes();
         }
 
         document.getElementById('record-form').addEventListener('submit', (e) => {
@@ -423,7 +482,8 @@
                 minutes: parseInt(document.getElementById('input-minutes').value) || 0,
                 students: finalStudents.join(', '),
                 target: document.getElementById('input-target').value,
-                type: document.getElementById('input-type').value,
+                mainType: document.getElementById('input-main-type').value,
+                subType: document.getElementById('input-sub-type').value,
                 summary: document.getElementById('input-summary').value
             };
 
@@ -449,7 +509,9 @@
             document.getElementById('input-minutes').value = r.minutes;
             document.getElementById('input-students').value = r.students;
             document.getElementById('input-target').value = r.target;
-            document.getElementById('input-type').value = r.type;
+            document.getElementById('input-main-type').value = r.mainType || "需求評估與處理";
+            updateSubTypes();
+            document.getElementById('input-sub-type').value = r.subType || "";
             document.getElementById('input-summary').value = r.summary;
             document.getElementById('form-title').innerText = '編輯間接服務紀錄';
             document.getElementById('btn-submit').innerText = '更新紀錄';
@@ -478,8 +540,9 @@
                     <td class="p-2.5"><div class="font-bold text-slate-700">${r.date}</div><div class="text-[10px] text-slate-400">${r.period}</div></td>
                     <td class="p-2.5">${r.place}</td>
                     <td class="p-2.5 font-bold text-[#4a90e2]">${r.minutes} 分</td>
-                    <td class="p-2.5"><div class="text-[#3b72b0] max-w-[120px] truncate" title="${r.students}">${r.students}</div><div class="text-[10px] text-slate-400 max-w-[120px] truncate" title="${r.target}">${r.target}</div></td>
-                    <td class="p-2.5 max-w-[180px]"><div class="truncate text-slate-600" title="${r.summary}">${r.summary}</div></td>
+                    <td class="p-2.5"><div class="text-[#3b72b0] max-w-[110px] truncate" title="${r.students}">${r.students}</div><div class="text-[10px] text-slate-400 max-w-[110px] truncate" title="${r.target}">${r.target}</div></td>
+                    <td class="p-2.5"><div class="font-semibold text-slate-700 text-xs">${r.mainType || ''}</div><div class="text-[10px] text-rose-500">${r.subType || ''}</div></td>
+                    <td class="p-2.5 max-w-[160px]"><div class="truncate text-slate-600" title="${r.summary}">${r.summary}</div></td>
                     <td class="p-2.5 text-center">
                         <button onclick="editRecord('${r.id}')" class="text-[#4a90e2] hover:text-[#3b72b0] mr-2"><i class="fa-solid fa-pen"></i></button>
                         <button onclick="deleteRecord('${r.id}')" class="text-rose-400 hover:text-rose-600"><i class="fa-solid fa-trash"></i></button>
@@ -487,11 +550,50 @@
                 </tr>
             `).join('');
 
+            renderIndividualStudentAnalysis();
             renderCharts(records);
         }
 
+        // 🌟 個別學生分析渲染邏輯
+        function renderIndividualStudentAnalysis() {
+            const selectedStu = document.getElementById('student-filter').value;
+            const stuRecords = records.filter(r => r.students.includes(selectedStu));
+
+            const totalMins = stuRecords.reduce((sum, r) => sum + r.minutes, 0);
+            const totalPeriods = Math.ceil(totalMins / 60);
+
+            document.getElementById('stu-kpi-count').innerText = stuRecords.length;
+            document.getElementById('stu-kpi-minutes').innerText = totalMins;
+            document.getElementById('stu-kpi-periods').innerText = totalPeriods;
+
+            // 統計該生在各「細項目」的頻率
+            const subTypeCounts = {};
+            stuRecords.forEach(r => {
+                const label = r.subType ? `${r.mainType}-${r.subType}` : r.mainType;
+                subTypeCounts[label] = (subTypeCounts[label] || 0) + 1;
+            });
+
+            if (chartInstances.studentDetail) chartInstances.studentDetail.destroy();
+
+            chartInstances.studentDetail = new Chart(document.getElementById('chart-student-detail'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(subTypeCounts),
+                    datasets: [{ label: '需求次數', data: Object.values(subTypeCounts), backgroundColor: '#e6748e', borderRadius: 4 }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, animation: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } }, x: { ticks: { font: { size: 10 } } } }
+                }
+            });
+        }
+
         function renderCharts(data) {
-            Object.values(chartInstances).forEach(c => c && c.destroy());
+            if (chartInstances.target) chartInstances.target.destroy();
+            if (chartInstances.type) chartInstances.type.destroy();
+            if (chartInstances.place) chartInstances.place.destroy();
+            if (chartInstances.daily) chartInstances.daily.destroy();
 
             // 1. 服務對象分布
             const targetCounts = {};
@@ -524,44 +626,42 @@
                     </div>`;
             }).join('');
 
-            // 2. 間接服務類型統計
+            // 2. 主類別統計
             const typeCounts = {};
-            data.forEach(r => { 
-                const shortType = r.type.split('(')[0];
-                typeCounts[shortType] = (typeCounts[shortType] || 0) + 1; 
+            data.forEach(r => {
+                const key = r.mainType || "其他";
+                typeCounts[key] = (typeCounts[key] || 0) + 1;
             });
-            const rawTypeLabels = Object.keys(typeCounts);
             chartInstances.type = new Chart(document.getElementById('chart-type'), {
                 type: 'bar',
-                data: { 
-                    labels: toVerticalText(rawTypeLabels),
-                    datasets: [{ label: '次數', data: Object.values(typeCounts), backgroundColor: '#4a90e2', borderRadius: 6 }] 
+                data: {
+                    labels: Object.keys(typeCounts),
+                    datasets: [{ label: '次數', data: Object.values(typeCounts), backgroundColor: '#4a90e2', borderRadius: 6 }]
                 },
-                options: { 
-                    responsive: true, maintainAspectRatio: false, animation: false, 
-                    plugins: { legend: { display: false } }, 
-                    scales: { x: { ticks: { font: { size: 10 }, maxRotation: 0, minRotation: 0 } } } 
+                options: {
+                    responsive: true, maintainAspectRatio: false, animation: false,
+                    plugins: { legend: { display: false } },
+                    scales: { x: { ticks: { font: { size: 10 } } } }
                 }
             });
 
             // 3. 地點時間占比
             const placeHours = {};
             data.forEach(r => placeHours[r.place] = (placeHours[r.place] || 0) + (r.minutes / 60));
-            const rawPlaceLabels = Object.keys(placeHours);
             chartInstances.place = new Chart(document.getElementById('chart-place'), {
                 type: 'bar',
-                data: { 
-                    labels: toVerticalText(rawPlaceLabels),
-                    datasets: [{ label: '小時', data: Object.values(placeHours), backgroundColor: '#7bb4e8', borderRadius: 6 }] 
+                data: {
+                    labels: Object.keys(placeHours),
+                    datasets: [{ label: '小時', data: Object.values(placeHours), backgroundColor: '#7bb4e8', borderRadius: 6 }]
                 },
-                options: { 
-                    responsive: true, maintainAspectRatio: false, animation: false, 
-                    plugins: { legend: { display: false } }, 
-                    scales: { x: { ticks: { font: { size: 10 }, maxRotation: 0, minRotation: 0 } } } 
+                options: {
+                    responsive: true, maintainAspectRatio: false, animation: false,
+                    plugins: { legend: { display: false } },
+                    scales: { x: { ticks: { font: { size: 10 } } } }
                 }
             });
 
-            // 4. 每日累積服務時間
+            // 4. 每日累積時間
             const dailyHours = {};
             data.forEach(r => dailyHours[r.date] = (dailyHours[r.date] || 0) + (r.minutes / 60));
             const sortedDates = Object.keys(dailyHours).sort((a, b) => new Date(a) - new Date(b));
@@ -581,9 +681,9 @@
 
         // 匯出 CSV 檔
         function exportCSV() {
-            let csvContent = "\uFEFF日期,節次,地點,服務時間(分),人員/對象,服務對象,間接服務類型,摘要\n";
+            let csvContent = "\uFEFF日期,節次,地點,服務時間(分),人員/對象,服務對象,間接服務大項,間接服務細項,摘要\n";
             records.forEach(r => {
-                csvContent += `"${r.date}","${r.period}","${r.place}","${r.minutes}","${r.students}","${r.target}","${r.type}","${r.summary.replace(/"/g, '""')}"\n`;
+                csvContent += `"${r.date}","${r.period}","${r.place}","${r.minutes}","${r.students}","${r.target}","${r.mainType || ''}","${r.subType || ''}","${r.summary.replace(/"/g, '""')}"\n`;
             });
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
@@ -592,7 +692,7 @@
             link.click();
         }
 
-        // 匯出 Word 簽核報表 (A4橫式、1.5cm邊界、12pt字型、含三方簽核)
+        // 匯出 Word 簽核報表 (含細項目欄位)
         function exportWord() {
             let rows = records.map(r => `
                 <tr>
@@ -600,7 +700,7 @@
                     <td>${r.place}</td>
                     <td>${r.minutes} 分</td>
                     <td>${r.students}<br><span style="font-size:10pt;color:#666;">${r.target}</span></td>
-                    <td>${r.type}</td>
+                    <td><b>${r.mainType || ''}</b><br><span style="font-size:10pt;color:#e6748e;">${r.subType || ''}</span></td>
                     <td>${r.summary}</td>
                 </tr>
             `).join('');
@@ -633,7 +733,7 @@
                                     <th style="width:10%;">地點</th>
                                     <th style="width:8%;">時間</th>
                                     <th style="width:18%;">人員/對象</th>
-                                    <th style="width:20%;">服務類型</th>
+                                    <th style="width:20%;">服務類型 (大項/細項)</th>
                                     <th style="width:32%;">服務內容摘要</th>
                                 </tr>
                             </thead>
