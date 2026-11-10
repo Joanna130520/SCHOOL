@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>間接服務系統 (橫向圖表版)</title>
+    <title>間接服務系統 (雙頁籤版)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js -->
@@ -42,6 +42,13 @@
             max-width: 340px;
             width: 90%;
         }
+
+        /* 頁籤選單 active 樣式 */
+        .nav-tab-active {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-bottom: 3px solid white;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body class="text-slate-800 min-h-screen">
@@ -60,18 +67,30 @@
 
     <!-- 📱 主要系統區域 -->
     <div id="main-app" class="hidden">
-        <!-- 導覽列 -->
+        <!-- 頂部導覽列與分頁選單 -->
         <nav class="bg-[#4a90e2] text-white shadow-sm sticky top-0 z-50">
-            <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-                <div class="flex items-center space-x-3">
-                    <i class="fa-solid fa-clock-rotate-left text-2xl text-blue-100"></i>
-                    <h1 class="text-xl font-bold tracking-wide">間接服務系統</h1>
+            <div class="max-w-7xl mx-auto px-4 py-2 flex flex-col md:flex-row justify-between items-center gap-3">
+                <div class="flex items-center space-x-6">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-clock-rotate-left text-2xl text-blue-100"></i>
+                        <h1 class="text-xl font-bold tracking-wide">間接服務系統</h1>
+                    </div>
+                    <!-- 新增 2 個分頁 Tab 按鈕 -->
+                    <div class="flex space-x-1">
+                        <button id="nav-btn-service" onclick="switchPage('indirect-service')" class="px-4 py-2 rounded-t-lg text-sm transition flex items-center gap-2 nav-tab-active">
+                            <i class="fa-solid fa-hand-holding-hand"></i> 間接服務
+                        </button>
+                        <button id="nav-btn-record" onclick="switchPage('indirect-record')" class="px-4 py-2 rounded-t-lg text-sm transition flex items-center gap-2 hover:bg-white/10">
+                            <i class="fa-solid fa-clipboard-list"></i> 間接服務紀錄
+                        </button>
+                    </div>
                 </div>
+
                 <div class="flex items-center space-x-2">
-                    <button onclick="exportWord()" class="bg-[#e6748e] hover:bg-[#d65d78] text-white px-3.5 py-1.5 rounded-xl text-xs font-medium transition flex items-center gap-1.5 shadow-sm">
-                        <i class="fa-solid fa-file-word"></i> 匯出 Word 簽核報表 (12pt 字型)
+                    <button onclick="exportWord()" class="bg-[#e6748e] hover:bg-[#d65d78] text-white px-3 py-1.5 rounded-xl text-xs font-medium transition flex items-center gap-1.5 shadow-sm">
+                        <i class="fa-solid fa-file-word"></i> 匯出 Word 報表
                     </button>
-                    <button onclick="exportCSV()" class="bg-[#7bb4e8] hover:bg-[#609ed9] text-white px-3.5 py-1.5 rounded-xl text-xs font-medium transition flex items-center gap-1.5 border border-blue-200">
+                    <button onclick="exportCSV()" class="bg-[#7bb4e8] hover:bg-[#609ed9] text-white px-3 py-1.5 rounded-xl text-xs font-medium transition flex items-center gap-1.5 border border-blue-200">
                         <i class="fa-solid fa-file-excel"></i> 匯出 CSV
                     </button>
                     <button onclick="logout()" class="bg-slate-700/50 hover:bg-slate-700 text-white px-2.5 py-1.5 rounded-xl text-xs font-medium transition flex items-center gap-1 border border-white/20 ml-2" title="登出系統">
@@ -81,267 +100,280 @@
             </div>
         </nav>
 
-        <!-- 主要內容區 -->
-        <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- 主要內容區：包含兩個獨立 Page 區塊 -->
+        <main class="max-w-7xl mx-auto px-4 py-6">
 
-            <!-- 左側：填寫表單區 -->
-            <section class="lg:col-span-5 bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#7bb4e8]/30 p-5">
-                <h2 class="text-lg font-bold text-slate-800 border-b border-[#7bb4e8]/20 pb-3 mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-pen-to-square text-[#4a90e2]"></i>
-                    <span id="form-title">新增間接服務紀錄</span>
-                </h2>
+            <!-- PAGE 1: 間接服務頁面 (填寫表單 + 圖表分析) -->
+            <div id="page-indirect-service" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-                <form id="record-form" class="space-y-4">
-                    <input type="hidden" id="edit-id" value="">
+                <!-- 左側：填寫表單區 -->
+                <section class="lg:col-span-5 bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#7bb4e8]/30 p-5">
+                    <h2 class="text-lg font-bold text-slate-800 border-b border-[#7bb4e8]/20 pb-3 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-pen-to-square text-[#4a90e2]"></i>
+                        <span id="form-title">新增間接服務紀錄</span>
+                    </h2>
 
-                    <!-- 日期 & 時數 -->
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">日期</label>
-                            <input type="date" id="input-date" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-[#7bb4e8] outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">服務時數 (分鐘)</label>
-                            <input type="number" id="input-minutes" min="0" step="5" required placeholder="分鐘數" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-[#7bb4e8] outline-none">
-                            <div class="flex gap-1 mt-1.5">
-                                <button type="button" onclick="addMinutes(30)" class="text-[10px] bg-[#d6e8fa] hover:bg-[#c3deea] text-[#3b72b0] font-medium px-2 py-0.5 rounded-md border border-[#7bb4e8]/30">+30分</button>
-                                <button type="button" onclick="addMinutes(60)" class="text-[10px] bg-[#d6e8fa] hover:bg-[#c3deea] text-[#3b72b0] font-medium px-2 py-0.5 rounded-md border border-[#7bb4e8]/30">+60分</button>
-                                <button type="button" onclick="addMinutes(120)" class="text-[10px] bg-[#d6e8fa] hover:bg-[#c3deea] text-[#3b72b0] font-medium px-2 py-0.5 rounded-md border border-[#7bb4e8]/30">+120分</button>
-                                <button type="button" onclick="addMinutes(180)" class="text-[10px] bg-[#d6e8fa] hover:bg-[#c3deea] text-[#3b72b0] font-medium px-2 py-0.5 rounded-md border border-[#7bb4e8]/30">+180分</button>
+                    <form id="record-form" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                        <input type="hidden" id="edit-id" value="">
+
+                        <!-- 日期 & 時數 -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">日期</label>
+                                <input type="date" id="input-date" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-[#7bb4e8] outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">服務時數 (分鐘)</label>
+                                <input type="number" id="input-minutes" min="0" step="5" required placeholder="分鐘數" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-[#7bb4e8] outline-none">
+                                <div class="flex gap-1 mt-1.5">
+                                    <button type="button" onclick="addMinutes(30)" class="text-[10px] bg-[#d6e8fa] hover:bg-[#c3deea] text-[#3b72b0] font-medium px-2 py-0.5 rounded-md border border-[#7bb4e8]/30">+30分</button>
+                                    <button type="button" onclick="addMinutes(60)" class="text-[10px] bg-[#d6e8fa] hover:bg-[#c3deea] text-[#3b72b0] font-medium px-2 py-0.5 rounded-md border border-[#7bb4e8]/30">+60分</button>
+                                    <button type="button" onclick="addMinutes(120)" class="text-[10px] bg-[#d6e8fa] hover:bg-[#c3deea] text-[#3b72b0] font-medium px-2 py-0.5 rounded-md border border-[#7bb4e8]/30">+120分</button>
+                                    <button type="button" onclick="addMinutes(180)" class="text-[10px] bg-[#d6e8fa] hover:bg-[#c3deea] text-[#3b72b0] font-medium px-2 py-0.5 rounded-md border border-[#7bb4e8]/30">+180分</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- 節次選擇 -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">節次 (可多選)</label>
-                        <div class="flex flex-wrap gap-1.5" id="period-chips">
-                            <button type="button" class="chip border border-slate-200 text-xs px-2.5 py-1 rounded-lg text-slate-600 bg-slate-50" onclick="togglePeriod(this, '第一節')">第一節</button>
-                            <button type="button" class="chip border border-slate-200 text-xs px-2.5 py-1 rounded-lg text-slate-600 bg-slate-50" onclick="togglePeriod(this, '第二節')">第二節</button>
-                            <button type="button" class="chip border border-slate-200 text-xs px-2.5 py-1 rounded-lg text-slate-600 bg-slate-50" onclick="togglePeriod(this, '第三節')">第三節</button>
-                            <button type="button" class="chip border border-slate-200 text-xs px-2.5 py-1 rounded-lg text-slate-600 bg-slate-50" onclick="togglePeriod(this, '第四節')">第四節</button>
-                            <button type="button" class="chip border border-slate-200 text-xs px-2.5 py-1 rounded-lg text-slate-600 bg-slate-50" onclick="togglePeriod(this, '中午')">中午</button>
-                            <button type="button" class="chip border border-slate-200 text-xs px-2.5 py-1 rounded-lg text-slate-600 bg-slate-50" onclick="togglePeriod(this, '第五節')">第五節</button>
-                            <button type="button" class="chip border border-slate-200 text-xs px-2.5 py-1 rounded-lg text-slate-600 bg-slate-50" onclick="togglePeriod(this, '第六節')">第六節</button>
-                            <button type="button" class="chip border border-slate-200 text-xs px-2.5 py-1 rounded-lg text-slate-600 bg-slate-50" onclick="togglePeriod(this, '第七節')">第七節</button>
-                            <button type="button" class="chip border border-slate-200 text-xs px-2.5 py-1 rounded-lg text-slate-600 bg-slate-50" onclick="togglePeriod(this, '第八節')">第八節</button>
-                        </div>
-                        <input type="text" id="input-period" placeholder="自訂或手動調整節次描述..." class="w-full mt-2 px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-[#7bb4e8] outline-none">
-                    </div>
-
-                    <!-- 地點 -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">地點</label>
-                        <div class="flex gap-2 mb-1.5 flex-wrap">
-                            <button type="button" onclick="setPlace('多元教室')" class="text-xs bg-[#d6e8fa] text-[#3b72b0] hover:bg-[#c3deea] px-2 py-1 rounded-md border border-[#7bb4e8]/30">多元教室</button>
-                            <button type="button" onclick="setPlace('第三會議室 6F')" class="text-xs bg-[#d6e8fa] text-[#3b72b0] hover:bg-[#c3deea] px-2 py-1 rounded-md border border-[#7bb4e8]/30">第三會議室 6F</button>
-                            <button type="button" onclick="setPlace('個諮室')" class="text-xs bg-[#d6e8fa] text-[#3b72b0] hover:bg-[#c3deea] px-2 py-1 rounded-md border border-[#7bb4e8]/30">個諮室</button>
-                            <button type="button" onclick="setPlace('學務處')" class="text-xs bg-[#d6e8fa] text-[#3b72b0] hover:bg-[#c3deea] px-2 py-1 rounded-md border border-[#7bb4e8]/30">學務處</button>
-                        </div>
-                        <input type="text" id="input-place" placeholder="請輸入地點" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-[#7bb4e8] outline-none">
-                    </div>
-
-                    <!-- 資源班學生/人員 -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">資源班學生 / 老師 / 家長</label>
-                        <div class="max-h-32 overflow-y-auto border border-slate-200 rounded-xl p-2 bg-slate-50/50 grid grid-cols-2 gap-1 mb-2" id="student-chips"></div>
-                        <input type="text" id="input-students" placeholder="自訂或補充人員（如：全校老師、許春美老師）" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-[#7bb4e8] outline-none">
-                    </div>
-
-                    <!-- 服務對象 -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">服務對象</label>
-                        <select id="input-target" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-[#7bb4e8] outline-none bg-white">
-                            <option value="資源班學生">資源班學生</option>
-                            <option value="普通班學生">普通班學生</option>
-                            <option value="普通班導師/教師">普通班導師/教師</option>
-                            <option value="行政人員">行政人員</option>
-                            <option value="學生家長">學生家長</option>
-                            <option value="專業團隊 (物理治療、心理治療、職能治療、語言治療)">專業團隊 (物理治療、心理治療、職能治療、語言治療)</option>
-                            <option value="鹿港國中中轉學生及老師及家長">鹿港國中中轉學生及老師及家長</option>
-                            <option value="其他">其他</option>
-                        </select>
-                    </div>
-
-                    <!-- 間接服務類型 -->
-                    <div class="grid grid-cols-1 gap-3">
+                        <!-- 節次選擇 -->
                         <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">間接服務類型 (主類別)</label>
-                            <select id="input-main-type" onchange="updateSubTypes()" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-[#7bb4e8] outline-none bg-white">
-                                <option value="需求評估與處理">需求評估與處理</option>
-                                <option value="個別晤談與指導">個別晤談與指導</option>
-                                <option value="諮詢服務">諮詢服務</option>
-                                <option value="特殊學生狀況處理">特殊學生狀況處理</option>
-                                <option value="其它">其它</option>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">節次 (可多選)</label>
+                            <div class="flex flex-wrap gap-1.5" id="period-chips">
+                                <button type="button" class="chip border border-slate-200 text-xs px-2.5 py-1 rounded-lg text-slate-600 bg-slate-50" onclick="togglePeriod(this, '第一節')">第一節</button>
+                                <button type="button" class="chip border border-slate-200 text-xs px-2.5 py-1 rounded-lg text-slate-600 bg-slate-50" onclick="togglePeriod(this, '第二節')">第二節</button>
+                                <button type="button" class="chip border border-slate-200 text-xs px-2.5 py-1 rounded-lg text-slate-600 bg-slate-50" onclick="togglePeriod(this, '第三節')">第三節</button>
+                                <button type="button" class="chip border border-slate-200 text-xs px-2.5 py-1 rounded-lg text-slate-600 bg-slate-50" onclick="togglePeriod(this, '第四節')">第四節</button>
+                                <button type="button" class="chip border border-slate-200 text-xs px-2.5 py-1 rounded-lg text-slate-600 bg-slate-50" onclick="togglePeriod(this, '中午')">中午</button>
+                                <button type="button" class="chip border border-slate-200 text-xs px-2.5 py-1 rounded-lg text-slate-600 bg-slate-50" onclick="togglePeriod(this, '第五節')">第五節</button>
+                                <button type="button" class="chip border border-slate-200 text-xs px-2.5 py-1 rounded-lg text-slate-600 bg-slate-50" onclick="togglePeriod(this, '第六節')">第六節</button>
+                                <button type="button" class="chip border border-slate-200 text-xs px-2.5 py-1 rounded-lg text-slate-600 bg-slate-50" onclick="togglePeriod(this, '第七節')">第七節</button>
+                                <button type="button" class="chip border border-slate-200 text-xs px-2.5 py-1 rounded-lg text-slate-600 bg-slate-50" onclick="togglePeriod(this, '第八節')">第八節</button>
+                            </div>
+                            <input type="text" id="input-period" placeholder="自訂或手動調整節次描述..." class="w-full mt-2 px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-[#7bb4e8] outline-none">
+                        </div>
+
+                        <!-- 地點 -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">地點</label>
+                            <div class="flex gap-2 mb-1.5 flex-wrap">
+                                <button type="button" onclick="setPlace('多元教室')" class="text-xs bg-[#d6e8fa] text-[#3b72b0] hover:bg-[#c3deea] px-2 py-1 rounded-md border border-[#7bb4e8]/30">多元教室</button>
+                                <button type="button" onclick="setPlace('第三會議室 6F')" class="text-xs bg-[#d6e8fa] text-[#3b72b0] hover:bg-[#c3deea] px-2 py-1 rounded-md border border-[#7bb4e8]/30">第三會議室 6F</button>
+                                <button type="button" onclick="setPlace('個諮室')" class="text-xs bg-[#d6e8fa] text-[#3b72b0] hover:bg-[#c3deea] px-2 py-1 rounded-md border border-[#7bb4e8]/30">個諮室</button>
+                                <button type="button" onclick="setPlace('學務處')" class="text-xs bg-[#d6e8fa] text-[#3b72b0] hover:bg-[#c3deea] px-2 py-1 rounded-md border border-[#7bb4e8]/30">學務處</button>
+                            </div>
+                            <input type="text" id="input-place" placeholder="請輸入地點" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-[#7bb4e8] outline-none">
+                        </div>
+
+                        <!-- 資源班學生/人員 -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">資源班學生 / 老師 / 家長</label>
+                            <div class="max-h-32 overflow-y-auto border border-slate-200 rounded-xl p-2 bg-slate-50/50 grid grid-cols-2 gap-1 mb-2" id="student-chips"></div>
+                            <input type="text" id="input-students" placeholder="自訂或補充人員（如：全校老師、許春美老師）" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-[#7bb4e8] outline-none">
+                        </div>
+
+                        <!-- 服務對象 -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">服務對象</label>
+                            <select id="input-target" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-[#7bb4e8] outline-none bg-white">
+                                <option value="資源班學生">資源班學生</option>
+                                <option value="普通班學生">普通班學生</option>
+                                <option value="普通班導師/教師">普通班導師/教師</option>
+                                <option value="行政人員">行政人員</option>
+                                <option value="學生家長">學生家長</option>
+                                <option value="專業團隊 (物理治療、心理治療、職能治療、語言治療)">專業團隊 (物理治療、心理治療、職能治療、語言治療)</option>
+                                <option value="鹿港國中中轉學生及老師及家長">鹿港國中中轉學生及老師及家長</option>
+                                <option value="其他">其他</option>
                             </select>
                         </div>
+
+                        <!-- 間接服務類型 -->
+                        <div class="grid grid-cols-1 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">間接服務類型 (主類別)</label>
+                                <select id="input-main-type" onchange="updateSubTypes()" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-[#7bb4e8] outline-none bg-white">
+                                    <option value="需求評估與處理">需求評估與處理</option>
+                                    <option value="個別晤談與指導">個別晤談與指導</option>
+                                    <option value="諮詢服務">諮詢服務</option>
+                                    <option value="特殊學生狀況處理">特殊學生狀況處理</option>
+                                    <option value="其它">其它</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">間接服務類型 (細項目)</label>
+                                <select id="input-sub-type" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-[#7bb4e8] outline-none bg-white">
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- 服務內容摘要 -->
                         <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">間接服務類型 (細項目)</label>
-                            <select id="input-sub-type" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-[#7bb4e8] outline-none bg-white">
-                            </select>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">服務內容摘要</label>
+                            <textarea id="input-summary" rows="3" placeholder="請輸入詳細摘要..." class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-[#7bb4e8] outline-none"></textarea>
                         </div>
-                    </div>
 
-                    <!-- 服務內容摘要 -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">服務內容摘要</label>
-                        <textarea id="input-summary" rows="3" placeholder="請輸入詳細摘要..." class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-[#7bb4e8] outline-none"></textarea>
-                    </div>
-
-                    <div class="flex gap-2 pt-2">
-                        <button type="submit" id="btn-submit" class="flex-1 bg-[#e6748e] hover:bg-[#d65d78] text-white font-medium py-2.5 px-4 rounded-xl text-sm transition shadow-sm">
-                            新增紀錄
-                        </button>
-                        <button type="button" id="btn-cancel" onclick="resetForm()" class="hidden bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-2.5 px-4 rounded-xl text-sm transition">
-                            取消
-                        </button>
-                    </div>
-                </form>
-            </section>
-
-            <!-- 右側：統計報表與紀錄清單 -->
-            <section class="lg:col-span-7 space-y-6">
-
-                <!-- 全校總體 KPI 卡片 -->
-                <div class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#7bb4e8]/30 p-5">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                            <i class="fa-solid fa-chart-pie text-[#4a90e2]"></i>
-                            <span>全校服務總體統計</span>
-                        </h2>
-                    </div>
-
-                    <div class="grid grid-cols-3 gap-3">
-                        <div class="bg-[#d6e8fa]/60 border border-[#7bb4e8]/30 rounded-xl p-3 text-center">
-                            <div class="text-xs text-[#3b72b0] font-medium mb-1">總服務筆數</div>
-                            <div class="text-2xl font-black text-[#3b72b0]" id="kpi-count">0</div>
-                        </div>
-                        <div class="bg-[#e5a9a9]/30 border border-[#e5a9a9]/50 rounded-xl p-3 text-center">
-                            <div class="text-xs text-[#b85b5b] font-medium mb-1">累積總分鐘數</div>
-                            <div class="text-2xl font-black text-[#b85b5b]" id="kpi-minutes">0 <span class="text-xs font-normal">分</span></div>
-                        </div>
-                        <div class="bg-[#d6e8fa]/80 border border-blue-200 rounded-xl p-3 text-center">
-                            <div class="text-xs text-blue-700 font-medium mb-1">折算總節數 (60分/節)</div>
-                            <div class="text-2xl font-black text-blue-700" id="kpi-periods">0 <span class="text-xs font-normal">節</span></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 雙切換視角卡片：全校學生總表 VS 個別學生需求分析 -->
-                <div class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#e6748e]/40 p-5">
-                    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4 border-b border-slate-100 pb-3">
-                        <div class="flex items-center gap-2">
-                            <i class="fa-solid fa-users-viewfinder text-[#e6748e] text-lg"></i>
-                            <h2 class="text-md font-bold text-slate-800">學生間接服務需求分析</h2>
-                        </div>
-                        
-                        <div class="flex bg-slate-100 p-1 rounded-xl gap-1">
-                            <button type="button" id="btn-mode-all" onclick="switchAnalysisMode('all')" class="px-3 py-1 text-xs font-medium rounded-lg transition bg-[#e6748e] text-white shadow-sm">
-                                📊 全校學生總表
+                        <div class="flex gap-2 pt-2">
+                            <button type="submit" id="btn-submit" class="flex-1 bg-[#e6748e] hover:bg-[#d65d78] text-white font-medium py-2.5 px-4 rounded-xl text-sm transition shadow-sm">
+                                新增紀錄
                             </button>
-                            <button type="button" id="btn-mode-single" onclick="switchAnalysisMode('single')" class="px-3 py-1 text-xs font-medium rounded-lg transition text-slate-600 hover:text-slate-900">
-                                👤 個別學生案件
+                            <button type="button" id="btn-cancel" onclick="resetForm()" class="hidden bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-2.5 px-4 rounded-xl text-sm transition">
+                                取消
                             </button>
                         </div>
-                    </div>
+                    </form>
+                </section>
 
-                    <div id="view-all-header" class="mb-3 text-xs text-slate-500 flex justify-between items-center">
-                        <span>顯示每位特教生累積之服務案件筆數與時間 (小時)</span>
-                        <span class="text-[#e6748e] font-semibold">作為全校整體需求輪廓參照</span>
-                    </div>
-
-                    <div id="view-single-controls" class="hidden mb-4">
-                        <div class="flex items-center justify-between mb-3 bg-rose-50/50 p-2.5 rounded-xl border border-rose-100">
-                            <span class="text-xs font-bold text-slate-700">選擇分析對象：</span>
-                            <select id="student-filter" onchange="renderAnalysisChart()" class="px-3 py-1.5 border border-[#e6748e]/40 rounded-xl text-xs font-medium text-slate-700 focus:ring-2 focus:ring-[#e6748e] outline-none bg-white">
-                            </select>
+                <!-- 右側：統計報表與圖表 -->
+                <section class="lg:col-span-7 space-y-6">
+                    <!-- 全校總體 KPI 卡片 -->
+                    <div class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#7bb4e8]/30 p-5">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-chart-pie text-[#4a90e2]"></i>
+                                <span>全校服務總體統計</span>
+                            </h2>
                         </div>
 
                         <div class="grid grid-cols-3 gap-3">
-                            <div class="bg-rose-50 border border-rose-100 rounded-xl p-2 text-center">
-                                <div class="text-[10px] text-rose-600 font-medium">該生服務筆數</div>
-                                <div class="text-lg font-bold text-rose-700" id="stu-kpi-count">0</div>
+                            <div class="bg-[#d6e8fa]/60 border border-[#7bb4e8]/30 rounded-xl p-3 text-center">
+                                <div class="text-xs text-[#3b72b0] font-medium mb-1">總服務筆數</div>
+                                <div class="text-2xl font-black text-[#3b72b0]" id="kpi-count">0</div>
                             </div>
-                            <div class="bg-rose-50 border border-rose-100 rounded-xl p-2 text-center">
-                                <div class="text-[10px] text-rose-600 font-medium">累積服務時間</div>
-                                <div class="text-lg font-bold text-rose-700" id="stu-kpi-minutes">0 <span class="text-xs font-normal">分</span></div>
+                            <div class="bg-[#e5a9a9]/30 border border-[#e5a9a9]/50 rounded-xl p-3 text-center">
+                                <div class="text-xs text-[#b85b5b] font-medium mb-1">累積總分鐘數</div>
+                                <div class="text-2xl font-black text-[#b85b5b]" id="kpi-minutes">0 <span class="text-xs font-normal">分</span></div>
                             </div>
-                            <div class="bg-rose-50 border border-rose-100 rounded-xl p-2 text-center">
-                                <div class="text-[10px] text-rose-600 font-medium">建議下學期需求</div>
-                                <div class="text-lg font-bold text-rose-700" id="stu-kpi-periods">0 <span class="text-xs font-normal">節</span></div>
+                            <div class="bg-[#d6e8fa]/80 border border-blue-200 rounded-xl p-3 text-center">
+                                <div class="text-xs text-blue-700 font-medium mb-1">折算總節數 (60分/節)</div>
+                                <div class="text-2xl font-black text-blue-700" id="kpi-periods">0 <span class="text-xs font-normal">節</span></div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="h-56 relative">
-                        <canvas id="chart-analysis"></canvas>
-                    </div>
-                </div>
+                    <!-- 雙切換視角卡片：全校學生總表 VS 個別學生需求分析 -->
+                    <div class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#e6748e]/40 p-5">
+                        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4 border-b border-slate-100 pb-3">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-users-viewfinder text-[#e6748e] text-lg"></i>
+                                <h2 class="text-md font-bold text-slate-800">學生間接服務需求分析</h2>
+                            </div>
+                            <div class="flex bg-slate-100 p-1 rounded-xl gap-1">
+                                <button type="button" id="btn-mode-all" onclick="switchAnalysisMode('all')" class="px-3 py-1 text-xs font-medium rounded-lg transition bg-[#e6748e] text-white shadow-sm">
+                                    📊 全校學生總表
+                                </button>
+                                <button type="button" id="btn-mode-single" onclick="switchAnalysisMode('single')" class="px-3 py-1 text-xs font-medium rounded-lg transition text-slate-600 hover:text-slate-900">
+                                    👤 個別學生案件
+                                </button>
+                            </div>
+                        </div>
 
-                <!-- 圖表區 -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#7bb4e8]/30 p-4">
-                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">服務對象分布</h3>
+                        <div id="view-all-header" class="mb-3 text-xs text-slate-500 flex justify-between items-center">
+                            <span>顯示每位特教生累積之服務案件筆數與時間 (小時)</span>
+                            <span class="text-[#e6748e] font-semibold">作為全校整體需求輪廓參照</span>
+                        </div>
+
+                        <div id="view-single-controls" class="hidden mb-4">
+                            <div class="flex items-center justify-between mb-3 bg-rose-50/50 p-2.5 rounded-xl border border-rose-100">
+                                <span class="text-xs font-bold text-slate-700">選擇分析對象：</span>
+                                <select id="student-filter" onchange="renderAnalysisChart()" class="px-3 py-1.5 border border-[#e6748e]/40 rounded-xl text-xs font-medium text-slate-700 focus:ring-2 focus:ring-[#e6748e] outline-none bg-white">
+                                </select>
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-3">
+                                <div class="bg-rose-50 border border-rose-100 rounded-xl p-2 text-center">
+                                    <div class="text-[10px] text-rose-600 font-medium">該生服務筆數</div>
+                                    <div class="text-lg font-bold text-rose-700" id="stu-kpi-count">0</div>
+                                </div>
+                                <div class="bg-rose-50 border border-rose-100 rounded-xl p-2 text-center">
+                                    <div class="text-[10px] text-rose-600 font-medium">累積服務時間</div>
+                                    <div class="text-lg font-bold text-rose-700" id="stu-kpi-minutes">0 <span class="text-xs font-normal">分</span></div>
+                                </div>
+                                <div class="bg-rose-50 border border-rose-100 rounded-xl p-2 text-center">
+                                    <div class="text-[10px] text-rose-600 font-medium">建議下學期需求</div>
+                                    <div class="text-lg font-bold text-rose-700" id="stu-kpi-periods">0 <span class="text-xs font-normal">節</span></div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="h-56 relative">
-                            <canvas id="chart-target"></canvas>
+                            <canvas id="chart-analysis"></canvas>
                         </div>
-                        <div id="target-legend" class="mt-3 grid grid-cols-1 gap-1 text-[11px] text-slate-600 border-t border-slate-100 pt-2 max-h-24 overflow-y-auto"></div>
                     </div>
 
-                    <!-- 🌟 間接服務類型統計 (改為橫向長條圖，文字直列不傾斜) -->
-                    <div class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#7bb4e8]/30 p-4">
-                        <div class="flex justify-between items-center mb-2">
-                            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">間接服務類型統計</h3>
-                            <div class="flex bg-slate-100 p-0.5 rounded-lg gap-0.5">
-                                <button type="button" id="btn-service-main" onclick="switchServiceTypeChart('main')" class="px-2 py-0.5 text-[10px] font-medium rounded transition bg-[#4a90e2] text-white">主項</button>
-                                <button type="button" id="btn-service-sub" onclick="switchServiceTypeChart('sub')" class="px-2 py-0.5 text-[10px] font-medium rounded transition text-slate-600 hover:text-slate-900">細項</button>
+                    <!-- 圖表區 -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#7bb4e8]/30 p-4">
+                            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">服務對象分布</h3>
+                            <div class="h-56 relative">
+                                <canvas id="chart-target"></canvas>
+                            </div>
+                            <div id="target-legend" class="mt-3 grid grid-cols-1 gap-1 text-[11px] text-slate-600 border-t border-slate-100 pt-2 max-h-24 overflow-y-auto"></div>
+                        </div>
+
+                        <div class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#7bb4e8]/30 p-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">間接服務類型統計</h3>
+                                <div class="flex bg-slate-100 p-0.5 rounded-lg gap-0.5">
+                                    <button type="button" id="btn-service-main" onclick="switchServiceTypeChart('main')" class="px-2 py-0.5 text-[10px] font-medium rounded transition bg-[#4a90e2] text-white">主項</button>
+                                    <button type="button" id="btn-service-sub" onclick="switchServiceTypeChart('sub')" class="px-2 py-0.5 text-[10px] font-medium rounded transition text-slate-600 hover:text-slate-900">細項</button>
+                                </div>
+                            </div>
+                            <div class="h-64 relative">
+                                <canvas id="chart-type"></canvas>
                             </div>
                         </div>
-                        <div class="h-64 relative">
-                            <canvas id="chart-type"></canvas>
+
+                        <div class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#7bb4e8]/30 p-4">
+                            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">地點時間占比 (小時)</h3>
+                            <div class="h-64 relative">
+                                <canvas id="chart-place"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#7bb4e8]/30 p-4">
+                            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">每日累積服務時間 (小時)</h3>
+                            <div class="h-64 relative">
+                                <canvas id="chart-daily"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- PAGE 2: 間接服務紀錄頁面 (歷史紀錄明細) -->
+            <div id="page-indirect-record" class="hidden">
+                <div class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#7bb4e8]/30 p-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-100 pb-4 mb-4 gap-3">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-list-check text-[#4a90e2]"></i>
+                                <span>間接服務紀錄明細表</span>
+                            </h2>
+                            <p class="text-xs text-slate-500 mt-1">管理並檢視歷史紀錄，提供快速搜尋、排序與資料匯出。</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-slate-500"><i class="fa-solid fa-arrow-down-short-wide mr-1"></i>依日期排序</span>
                         </div>
                     </div>
 
-                    <div class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#7bb4e8]/30 p-4">
-                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">地點時間占比 (小時)</h3>
-                        <div class="h-64 relative">
-                            <canvas id="chart-place"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#7bb4e8]/30 p-4">
-                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">每日累積服務時間 (小時)</h3>
-                        <div class="h-64 relative">
-                            <canvas id="chart-daily"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 歷史紀錄列表 -->
-                <div class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#7bb4e8]/30 p-5">
-                    <h2 class="text-md font-bold text-slate-800 border-b border-slate-100 pb-3 mb-3 flex items-center justify-between">
-                        <span><i class="fa-solid fa-list-check text-[#4a90e2] mr-2"></i>間接服務紀錄明細</span>
-                        <span class="text-xs text-blue-500 font-medium"><i class="fa-solid fa-arrow-down-short-wide mr-1"></i>依日期排序</span>
-                    </h2>
-                    <div class="overflow-x-auto max-h-80 overflow-y-auto">
+                    <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs text-slate-600">
-                            <thead class="bg-[#d6e8fa]/50 text-slate-700 sticky top-0">
+                            <thead class="bg-[#d6e8fa]/60 text-slate-700 sticky top-0">
                                 <tr>
-                                    <th class="p-2.5">日期/節次</th>
-                                    <th class="p-2.5">地點</th>
-                                    <th class="p-2.5">時間</th>
-                                    <th class="p-2.5">人員/對象</th>
-                                    <th class="p-2.5">服務大項/細項</th>
-                                    <th class="p-2.5">摘要</th>
-                                    <th class="p-2.5 text-center">操作</th>
+                                    <th class="p-3">日期/節次</th>
+                                    <th class="p-3">地點</th>
+                                    <th class="p-3">時間 (分)</th>
+                                    <th class="p-3">人員/對象</th>
+                                    <th class="p-3">服務大項/細項</th>
+                                    <th class="p-3">摘要</th>
+                                    <th class="p-3 text-center">操作</th>
                                 </tr>
                             </thead>
                             <tbody id="table-body" class="divide-y divide-slate-100"></tbody>
                         </table>
                     </div>
                 </div>
+            </div>
 
-            </section>
         </main>
     </div>
 
@@ -388,10 +420,10 @@
             { id: "3", date: "2026/10/06", period: "第六節, 第七節", place: "多元教室", minutes: 120, students: "113 張O峻, 201 劉O兆", target: "專業團隊 (物理治療、心理治療、職能治療、語言治療)", mainType: "需求評估與處理", subType: "1-4 專業團隊服務的規劃與合作", summary: "語言治療課程" },
             { id: "4", date: "2026/10/12", period: "第六節, 第七節", place: "多元教室", minutes: 120, students: "113 張O峻, 201 劉O兆", target: "專業團隊 (物理治療、心理治療、職能治療、語言治療)", mainType: "需求評估與處理", subType: "1-4 專業團隊服務的規劃與合作", summary: "語言治療課程" },
             { id: "5", date: "2026/10/22", period: "第六節, 第七節", place: "多元教室", minutes: 120, students: "104 許O棠, 110 蔡O昌", target: "專業團隊 (物理治療、心理治療、職能治療、語言治療)", mainType: "需求評估與處理", subType: "1-4 專業團隊服務的規劃與合作", summary: "語言治療課程" },
-            { id: "6", date: "2026/10/19", period: "第三節", place: "多元教室", minutes: 60, students: "102 陳O芯", target: "專業團隊 (物理治療、心理治療、職能治療、語言治療)", mainType: "需求評估與處理", subType: "1-4 專業團隊服務的規劃與合作", summary: "物理治療課程" },
+            { id: "6", date: "2026/10/19", period: "第三節", place: "多元教室", minutes: 60, students: "102 陳O芯", target: "專業團隊 (物理治療、心理治療、職能治療、語言治療)", mainType: "需求評估與處理", subType: "1-4 專業團隊服務的规划與合作", summary: "物理治療課程" },
             { id: "7", date: "2026/10/22", period: "第二節, 第三節, 第四節", place: "第三會議室 6F", minutes: 180, students: "108 黃O瑞, 201 劉O兆", target: "普通班學生", mainType: "其它", subType: "5-3 特殊教育宣導", summary: "入班宣導_國立彰化師範大學教授 - 洪雅惠教授" },
             { id: "8", date: "2026/10/29", period: "第二節, 第三節, 第四節", place: "第三會議室 6F", minutes: 180, students: "102 陳O芯, 207 洪O恩, 209 鄭O煜", target: "普通班學生", mainType: "其它", subType: "5-3 特殊教育宣導", summary: "入班宣導_國立彰化師範大學教授 - 林千惠教授" },
-            { id: "9", date: "2026/10/27", period: "第二節, 第三節", place: "校園參觀", minutes: 120, students: "鹿港國中", target: "鹿港國中特殊學生及老師及家長", mainType: "諮詢服務", subType: "3-1 特殊教育諮詢服務", summary: "鹿港國中特教班師生蒞校參訪及轉銜諮詢。" },
+            { id: "9", date: "2026/10/27", period: "第二節, 第三節", place: "校園參觀", minutes: 120, students: "鹿港國中", target: "鹿港國中中轉學生及老師及家長", mainType: "諮詢服務", subType: "3-1 特殊教育諮詢服務", summary: "鹿港國中特教班師生蒞校參訪及轉銜諮詢。" },
             { id: "10", date: "2026/10/14", period: "第六節, 第七節, 第八節", place: "第三會議室 6F", minutes: 180, students: "全校老師", target: "普通班導師/教師", mainType: "其它", subType: "5-3 特殊教育宣導", summary: "115學年度第1學期全校教師特教知能研習" },
             { id: "11", date: "2026/10/07", period: "第五節, 第六節", place: "多元教室", minutes: 120, students: "蔣O美老師", target: "普通班導師/教師", mainType: "諮詢服務", subType: "3-2 課程調整諮詢服務", summary: "討論特殊生個別化教學與評量相關事宜。" },
             { id: "12", date: "2026/10/07", period: "第七節", place: "多元教室", minutes: 60, students: "113 張O峻, 范老師", target: "普通班導師/教師", mainType: "諮詢服務", subType: "3-2 課程調整諮詢服務", summary: "討論特殊生個別化教學與評量相關事宜" },
@@ -407,6 +439,7 @@
         let currentAnalysisMode = 'all'; 
         let serviceChartMode = 'main'; 
 
+        // 🔑 密碼驗證與初始化
         function checkPassword() {
             const input = document.getElementById('pwd-input').value;
             if (input === TARGET_PASSWORD) {
@@ -431,6 +464,26 @@
                 initApp();
             }
         });
+
+        // 🔄 分頁切換 (Tab Switch)
+        function switchPage(pageId) {
+            const p1 = document.getElementById('page-indirect-service');
+            const p2 = document.getElementById('page-indirect-record');
+            const btn1 = document.getElementById('nav-btn-service');
+            const btn2 = document.getElementById('nav-btn-record');
+
+            if (pageId === 'indirect-service') {
+                p1.classList.remove('hidden');
+                p2.classList.add('hidden');
+                btn1.classList.add('nav-tab-active');
+                btn2.classList.remove('nav-tab-active');
+            } else {
+                p1.classList.add('hidden');
+                p2.classList.remove('hidden');
+                btn2.classList.add('nav-tab-active');
+                btn1.classList.remove('nav-tab-active');
+            }
+        }
 
         function initApp() {
             const saved = localStorage.getItem('school_service_records_v4');
@@ -489,7 +542,11 @@
                 selectedPeriods.push(period);
                 btn.classList.add('chip-active');
             }
-            document.getElementById('input-period').value = selectedPeriods.join(',');
+            document.getElementById('input-period').value = selectedPeriods.join(', ');
+        }
+
+        function setPlace(placeName) {
+            document.getElementById('input-place').value = placeName;
         }
 
         function addMinutes(mins) {
@@ -497,81 +554,147 @@
             el.value = (parseInt(el.value) || 0) + mins;
         }
 
-        function setPlace(place) { document.getElementById('input-place').value = place; }
-
-        function resetForm() {
-            document.getElementById('record-form').reset();
-            document.getElementById('edit-id').value = '';
-            document.getElementById('form-title').innerText = '新增間接服務紀錄';
-            document.getElementById('btn-submit').innerText = '新增紀錄';
-            document.getElementById('btn-cancel').classList.add('hidden');
-            document.getElementById('input-date').valueAsDate = new Date();
-            selectedPeriods = [];
-            selectedStudents = [];
-            document.querySelectorAll('.chip').forEach(c => c.classList.remove('chip-active'));
-            document.querySelectorAll('#student-chips input').forEach(i => i.checked = false);
-            updateSubTypes();
-        }
-
-        document.getElementById('record-form').addEventListener('submit', (e) => {
+        // 📝 新增 / 修改紀錄
+        function handleFormSubmit(e) {
             e.preventDefault();
             const editId = document.getElementById('edit-id').value;
-            let customStudents = document.getElementById('input-students').value.trim();
-            let finalStudents = [...selectedStudents];
-            if (customStudents) finalStudents.push(customStudents);
+            const dateVal = document.getElementById('input-date').value.replace(/-/g, '/');
+            const minutes = parseInt(document.getElementById('input-minutes').value) || 0;
+            const period = document.getElementById('input-period').value;
+            const place = document.getElementById('input-place').value;
+            
+            let extraStudents = document.getElementById('input-students').value.trim();
+            let allStudentsArr = [...selectedStudents];
+            if (extraStudents) allStudentsArr.push(extraStudents);
+            const studentsStr = allStudentsArr.join(', ') || '無註明';
 
-            const record = {
-                id: editId || Date.now().toString(),
-                date: document.getElementById('input-date').value.replace(/-/g, '/'),
-                period: document.getElementById('input-period').value,
-                place: document.getElementById('input-place').value,
-                minutes: parseInt(document.getElementById('input-minutes').value) || 0,
-                students: finalStudents.join(', '),
-                target: document.getElementById('input-target').value,
-                mainType: document.getElementById('input-main-type').value,
-                subType: document.getElementById('input-sub-type').value,
-                summary: document.getElementById('input-summary').value
-            };
+            const target = document.getElementById('input-target').value;
+            const mainType = document.getElementById('input-main-type').value;
+            const subType = document.getElementById('input-sub-type').value;
+            const summary = document.getElementById('input-summary').value;
 
             if (editId) {
                 const idx = records.findIndex(r => r.id === editId);
-                if (idx !== -1) records[idx] = record;
+                if (idx !== -1) {
+                    records[idx] = { id: editId, date: dateVal, period, place, minutes, students: studentsStr, target, mainType, subType, summary };
+                }
             } else {
-                records.push(record);
+                const newRec = {
+                    id: Date.now().toString(),
+                    date: dateVal,
+                    period,
+                    place,
+                    minutes,
+                    students: studentsStr,
+                    target,
+                    mainType,
+                    subType,
+                    summary
+                };
+                records.unshift(newRec);
             }
 
             saveData();
             resetForm();
             renderApp();
-        });
+        }
 
         function editRecord(id) {
             const r = records.find(item => item.id === id);
             if (!r) return;
+
+            // 切換至服務頁面編輯
+            switchPage('indirect-service');
+
             document.getElementById('edit-id').value = r.id;
-            document.getElementById('input-date').value = r.date.replace(/\//g, '-');
-            document.getElementById('input-period').value = r.period;
-            document.getElementById('input-place').value = r.place;
-            document.getElementById('input-minutes').value = r.minutes;
-            document.getElementById('input-students').value = r.students;
-            document.getElementById('input-target').value = r.target;
-            document.getElementById('input-main-type').value = r.mainType || "需求評估與處理";
-            updateSubTypes();
-            document.getElementById('input-sub-type').value = r.subType || "";
-            document.getElementById('input-summary').value = r.summary;
-            document.getElementById('form-title').innerText = '編輯間接服務紀錄';
-            document.getElementById('btn-submit').innerText = '更新紀錄';
+            document.getElementById('form-title').innerText = "編輯間接服務紀錄";
+            document.getElementById('btn-submit').innerText = "更新紀錄";
             document.getElementById('btn-cancel').classList.remove('hidden');
+
+            document.getElementById('input-date').value = r.date.replace(/\//g, '-');
+            document.getElementById('input-minutes').value = r.minutes;
+            document.getElementById('input-period').value = r.period || '';
+            document.getElementById('input-place').value = r.place || '';
+            document.getElementById('input-target').value = r.target;
+            document.getElementById('input-main-type').value = r.mainType;
+            updateSubTypes();
+            document.getElementById('input-sub-type').value = r.subType;
+            document.getElementById('input-summary').value = r.summary;
+
+            document.getElementById('input-students').value = r.students || '';
         }
 
         function deleteRecord(id) {
-            if (confirm('確定要刪除此筆紀錄嗎？')) {
+            if (confirm('確定要刪除這筆服務紀錄嗎？')) {
                 records = records.filter(r => r.id !== id);
                 saveData();
                 renderApp();
             }
         }
 
+        function resetForm() {
+            document.getElementById('record-form').reset();
+            document.getElementById('edit-id').value = '';
+            document.getElementById('form-title').innerText = "新增間接服務紀錄";
+            document.getElementById('btn-[#e6748e]')
+            document.getElementById('btn-submit').innerText = "新增紀錄";
+            document.getElementById('btn-cancel').classList.add('hidden');
+            selectedPeriods = [];
+            selectedStudents = [];
+            document.querySelectorAll('#period-chips .chip').forEach(c => c.classList.remove('chip-active'));
+            renderStudentChips();
+            document.getElementById('input-date').valueAsDate = new Date();
+        }
+
+        // 📊 渲染系統全貌（統計、明細與圖表）
+        function renderApp() {
+            // Sort records descending by date
+            records.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            // 1. KPI
+            const totalCount = records.length;
+            const totalMinutes = records.reduce((acc, cur) => acc + (parseInt(cur.minutes) || 0), 0);
+            const totalPeriods = (totalMinutes / 60).toFixed(1);
+
+            document.getElementById('kpi-count').innerText = totalCount;
+            document.getElementById('kpi-minutes').innerHTML = `${totalMinutes} <span class="text-xs font-normal">分</span>`;
+            document.getElementById('kpi-periods').innerHTML = `${totalPeriods} <span class="text-xs font-normal">節</span>`;
+
+            // 2. 表格 (Render Table Body)
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = records.map(r => `
+                <tr class="hover:bg-blue-50/40 transition">
+                    <td class="p-2.5 font-medium text-slate-700 whitespace-nowrap">
+                        ${r.date}<br>
+                        <span class="text-[10px] text-slate-400">${r.period || '-'}</span>
+                    </td>
+                    <td class="p-2.5 whitespace-nowrap">${r.place || '-'}</td>
+                    <td class="p-2.5 whitespace-nowrap font-bold text-[#3b72b0]">${r.minutes} 分</td>
+                    <td class="p-2.5 max-w-[140px]">
+                        <div class="font-semibold text-slate-700 truncate">${r.students}</div>
+                        <div class="text-[10px] text-slate-400 truncate">${r.target}</div>
+                    </td>
+                    <td class="p-2.5">
+                        <div class="inline-block bg-[#d6e8fa] text-[#3b72b0] text-[10px] px-1.5 py-0.5 rounded font-medium mb-0.5">${r.mainType}</div>
+                        <div class="text-[11px] text-slate-600 truncate">${r.subType}</div>
+                    </td>
+                    <td class="p-2.5 max-w-xs truncate" title="${r.summary}">${r.summary}</td>
+                    <td class="p-2.5 text-center whitespace-nowrap">
+                        <button onclick="editRecord('${r.id}')" class="text-blue-600 hover:text-blue-800 mr-2" title="編輯"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="deleteRecord('${r.id}')" class="text-rose-500 hover:text-rose-700" title="刪除"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+
+            // 3. Render Charts
+            renderAnalysisChart();
+            renderTargetChart();
+            renderTypeChart();
+            renderPlaceChart();
+            renderDailyChart();
+        }
+
+        // 📈 切換模式與圖表渲染
         function switchAnalysisMode(mode) {
             currentAnalysisMode = mode;
             const btnAll = document.getElementById('btn-mode-all');
@@ -593,306 +716,269 @@
             renderAnalysisChart();
         }
 
-        function switchServiceTypeChart(mode) {
-            serviceChartMode = mode;
-            const btnMain = document.getElementById('btn-service-main');
-            const btnSub = document.getElementById('btn-service-sub');
-
-            if (mode === 'main') {
-                btnMain.className = "px-2 py-0.5 text-[10px] font-medium rounded transition bg-[#4a90e2] text-white";
-                btnSub.className = "px-2 py-0.5 text-[10px] font-medium rounded transition text-slate-600 hover:text-slate-900";
-            } else {
-                btnSub.className = "px-2 py-0.5 text-[10px] font-medium rounded transition bg-[#4a90e2] text-white";
-                btnMain.className = "px-2 py-0.5 text-[10px] font-medium rounded transition text-slate-600 hover:text-slate-900";
-            }
-            renderTypeChart(records);
-        }
-
-        function renderApp() {
-            records.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-            document.getElementById('kpi-count').innerText = records.length;
-            const totalMins = records.reduce((sum, r) => sum + r.minutes, 0);
-            document.getElementById('kpi-minutes').innerText = totalMins;
-            document.getElementById('kpi-periods').innerText = Math.round(totalMins / 60);
-
-            const tbody = document.getElementById('table-body');
-            tbody.innerHTML = records.map(r => `
-                <tr class="hover:bg-[#d6e8fa]/30 transition">
-                    <td class="p-2.5"><div class="font-bold text-slate-700">${r.date}</div><div class="text-[10px] text-slate-400">${r.period}</div></td>
-                    <td class="p-2.5">${r.place}</td>
-                    <td class="p-2.5 font-bold text-[#4a90e2]">${r.minutes} 分</td>
-                    <td class="p-2.5"><div class="text-[#3b72b0] max-w-[110px] truncate" title="${r.students}">${r.students}</div><div class="text-[10px] text-slate-400 max-w-[110px] truncate" title="${r.target}">${r.target}</div></td>
-                    <td class="p-2.5"><div class="font-semibold text-slate-700 text-xs">${r.mainType || ''}</div><div class="text-[10px] text-rose-500">${r.subType || ''}</div></td>
-                    <td class="p-2.5 max-w-[160px]"><div class="truncate text-slate-600" title="${r.summary}">${r.summary}</div></td>
-                    <td class="p-2.5 text-center">
-                        <button onclick="editRecord('${r.id}')" class="text-[#4a90e2] hover:text-[#3b72b0] mr-2"><i class="fa-solid fa-pen"></i></button>
-                        <button onclick="deleteRecord('${r.id}')" class="text-rose-400 hover:text-rose-600"><i class="fa-solid fa-trash"></i></button>
-                    </td>
-                </tr>
-            `).join('');
-
-            renderAnalysisChart();
-            renderCharts(records);
-        }
-
         function renderAnalysisChart() {
-            if (chartInstances.analysisChart) chartInstances.analysisChart.destroy();
+            const ctx = document.getElementById('chart-analysis').getContext('2d');
+            if (chartInstances['analysis']) chartInstances['analysis'].destroy();
 
             if (currentAnalysisMode === 'all') {
                 const studentStats = {};
-                STUDENT_LIST.forEach(s => studentStats[s] = { count: 0, hours: 0 });
-
+                STUDENT_LIST.forEach(s => studentStats[s] = 0);
                 records.forEach(r => {
                     STUDENT_LIST.forEach(s => {
-                        if (r.students.includes(s)) {
-                            studentStats[s].count += 1;
-                            studentStats[s].hours += (r.minutes / 60);
+                        if (r.students && r.students.includes(s)) {
+                            studentStats[s] += (r.minutes / 60);
                         }
                     });
                 });
 
-                const activeStudents = STUDENT_LIST.filter(s => studentStats[s].count > 0);
-                const counts = activeStudents.map(s => studentStats[s].count);
-                const hours = activeStudents.map(s => studentStats[s].hours.toFixed(1));
-
-                chartInstances.analysisChart = new Chart(document.getElementById('chart-analysis'), {
+                chartInstances['analysis'] = new Chart(ctx, {
                     type: 'bar',
                     data: {
-                        labels: activeStudents.map(s => s.split(' ')[1] || s),
-                        datasets: [
-                            { label: '案件筆數', data: counts, backgroundColor: '#e6748e', borderRadius: 4 },
-                            { label: '總時數(小時)', data: hours, backgroundColor: '#7bb4e8', borderRadius: 4 }
-                        ]
+                        labels: STUDENT_LIST.map(s => s.split(' ')[1] || s),
+                        datasets: [{
+                            label: '服務時間 (小時)',
+                            data: STUDENT_LIST.map(s => studentStats[s]),
+                            backgroundColor: '#e6748e',
+                            borderRadius: 6
+                        }]
                     },
                     options: {
-                        responsive: true, maintainAspectRatio: false, animation: false,
-                        plugins: { legend: { display: true, position: 'top' } },
-                        scales: { y: { beginAtZero: true }, x: { ticks: { font: { size: 10 } } } }
-                    }
-                });
-
-            } else {
-                const selectedStu = document.getElementById('student-filter').value;
-                const stuRecords = records.filter(r => r.students.includes(selectedStu));
-
-                const totalMins = stuRecords.reduce((sum, r) => sum + r.minutes, 0);
-                const totalPeriods = Math.ceil(totalMins / 60);
-
-                document.getElementById('stu-kpi-count').innerText = stuRecords.length;
-                document.getElementById('stu-kpi-minutes').innerText = totalMins;
-                document.getElementById('stu-kpi-periods').innerText = totalPeriods;
-
-                const subTypeCounts = {};
-                stuRecords.forEach(r => {
-                    const label = r.subType || r.mainType;
-                    subTypeCounts[label] = (subTypeCounts[label] || 0) + 1;
-                });
-
-                chartInstances.analysisChart = new Chart(document.getElementById('chart-analysis'), {
-                    type: 'bar',
-                    data: {
-                        labels: Object.keys(subTypeCounts),
-                        datasets: [{ label: '需求次數', data: Object.values(subTypeCounts), backgroundColor: '#e6748e', borderRadius: 4 }]
-                    },
-                    options: {
-                        indexAxis: 'y', // 橫向排列，文字絕對直列水平
-                        responsive: true, maintainAspectRatio: false, animation: false,
+                        responsive: true,
+                        maintainAspectRatio: false,
                         plugins: { legend: { display: false } },
-                        scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } }, y: { ticks: { font: { size: 10 } } } }
+                        scales: { y: { beginAtZero: true } }
                     }
-                });
-            }
-        }
-
-        // 🌟 橫向長條圖：解決文字過長與傾斜問題
-        function renderTypeChart(data) {
-            if (chartInstances.type) chartInstances.type.destroy();
-
-            const counts = {};
-            if (serviceChartMode === 'main') {
-                data.forEach(r => {
-                    const key = r.mainType || "其它";
-                    counts[key] = (counts[key] || 0) + 1;
                 });
             } else {
-                data.forEach(r => {
-                    const key = r.subType || r.mainType || "其它";
-                    counts[key] = (counts[key] || 0) + 1;
+                const selectedStudent = document.getElementById('student-filter').value;
+                const filtered = records.filter(r => r.students && r.students.includes(selectedStudent));
+                
+                const count = filtered.length;
+                const minutes = filtered.reduce((a, c) => a + c.minutes, 0);
+                const suggestedPeriods = (minutes / 60).toFixed(1);
+
+                document.getElementById('stu-kpi-count').innerText = count;
+                document.getElementById('stu-kpi-minutes').innerHTML = `${minutes} <span class="text-xs font-normal">分</span>`;
+                document.getElementById('stu-kpi-periods').innerHTML = `${suggestedPeriods} <span class="text-xs font-normal">節</span>`;
+
+                const typeStats = {};
+                filtered.forEach(r => {
+                    typeStats[r.mainType] = (typeStats[r.mainType] || 0) + (r.minutes / 60);
+                });
+
+                chartInstances['analysis'] = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(typeStats),
+                        datasets: [{
+                            label: '服務時數 (小時)',
+                            data: Object.values(typeStats),
+                            backgroundColor: '#7bb4e8',
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true } }
+                    }
                 });
             }
-
-            chartInstances.type = new Chart(document.getElementById('chart-type'), {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(counts),
-                    datasets: [{ label: '次數', data: Object.values(counts), backgroundColor: '#4a90e2', borderRadius: 4 }]
-                },
-                options: {
-                    indexAxis: 'y', // 關鍵：改為橫向顯示，讓 Y 軸的長文字直列水平不傾斜
-                    responsive: true, maintainAspectRatio: false, animation: false,
-                    plugins: { legend: { display: false } },
-                    scales: { 
-                        x: { beginAtZero: true, ticks: { stepSize: 1 } }, 
-                        y: { ticks: { font: { size: serviceChartMode === 'sub' ? 9 : 10 } } } 
-                    }
-                }
-            });
         }
 
-        function renderCharts(data) {
-            if (chartInstances.target) chartInstances.target.destroy();
-            if (chartInstances.place) chartInstances.place.destroy();
-            if (chartInstances.daily) chartInstances.daily.destroy();
+        function renderTargetChart() {
+            const ctx = document.getElementById('chart-target').getContext('2d');
+            if (chartInstances['target']) chartInstances['target'].destroy();
 
-            // 1. 服務對象分布
             const targetCounts = {};
-            data.forEach(r => {
-                const key = r.target.length > 10 ? r.target.substring(0, 9) + '...' : r.target;
-                targetCounts[key] = (targetCounts[key] || 0) + 1;
+            records.forEach(r => {
+                targetCounts[r.target] = (targetCounts[r.target] || 0) + 1;
             });
-            const targetLabels = Object.keys(targetCounts);
-            const targetValues = Object.values(targetCounts);
 
-            chartInstances.target = new Chart(document.getElementById('chart-target'), {
+            chartInstances['target'] = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: targetLabels,
-                    datasets: [{ data: targetValues, backgroundColor: PALETTE.slice(0, targetLabels.length), borderWidth: 2, borderColor: '#ffffff' }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { display: false } } }
-            });
-
-            document.getElementById('target-legend').innerHTML = targetLabels.map((lbl, idx) => {
-                const count = targetValues[idx];
-                const pct = data.length > 0 ? ((count / data.length) * 100).toFixed(1) : 0;
-                return `
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-1.5 truncate">
-                            <span class="w-2.5 h-2.5 rounded-full inline-block flex-shrink-0" style="background-color: ${PALETTE[idx % PALETTE.length]}"></span>
-                            <span class="truncate" title="${lbl}">${lbl}</span>
-                        </div>
-                        <span class="font-bold text-slate-500 text-[10px] ml-1">${count}筆 (${pct}%)</span>
-                    </div>`;
-            }).join('');
-
-            // 2. 服務類型統計
-            renderTypeChart(data);
-
-            // 3. 地點時間占比
-            const placeHours = {};
-            data.forEach(r => placeHours[r.place] = (placeHours[r.place] || 0) + (r.minutes / 60));
-            chartInstances.place = new Chart(document.getElementById('chart-place'), {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(placeHours),
-                    datasets: [{ label: '小時', data: Object.values(placeHours), backgroundColor: '#7bb4e8', borderRadius: 6 }]
+                    labels: Object.keys(targetCounts),
+                    datasets: [{
+                        data: Object.values(targetCounts),
+                        backgroundColor: PALETTE
+                    }]
                 },
                 options: {
-                    responsive: true, maintainAspectRatio: false, animation: false,
-                    plugins: { legend: { display: false } },
-                    scales: { x: { ticks: { font: { size: 10 } } } }
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
                 }
             });
 
-            // 4. 每日累積時間
-            const dailyHours = {};
-            data.forEach(r => dailyHours[r.date] = (dailyHours[r.date] || 0) + (r.minutes / 60));
-            const sortedDates = Object.keys(dailyHours).sort((a, b) => new Date(a) - new Date(b));
-            chartInstances.daily = new Chart(document.getElementById('chart-daily'), {
-                type: 'line',
+            const legend = document.getElementById('target-legend');
+            legend.innerHTML = Object.keys(targetCounts).map((key, i) => `
+                <div class="flex justify-between items-center">
+                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full inline-block" style="background:${PALETTE[i % PALETTE.length]}"></span><span class="truncate max-w-[150px]">${key}</span></span>
+                    <span class="font-bold">${targetCounts[key]} 筆</span>
+                </div>
+            `).join('');
+        }
+
+        function switchServiceTypeChart(mode) {
+            serviceChartMode = mode;
+            document.getElementById('btn-service-main').className = mode === 'main' ? 'px-2 py-0.5 text-[10px] font-medium rounded transition bg-[#4a90e2] text-white' : 'px-2 py-0.5 text-[10px] font-medium rounded transition text-slate-600 hover:text-slate-900';
+            document.getElementById('btn-service-sub').className = mode === 'sub' ? 'px-2 py-0.5 text-[10px] font-medium rounded transition bg-[#4a90e2] text-white' : 'px-2 py-0.5 text-[10px] font-medium rounded transition text-slate-600 hover:text-slate-900';
+            renderTypeChart();
+        }
+
+        function renderTypeChart() {
+            const ctx = document.getElementById('chart-type').getContext('2d');
+            if (chartInstances['type']) chartInstances['type'].destroy();
+
+            const stats = {};
+            records.forEach(r => {
+                const key = serviceChartMode === 'main' ? r.mainType : r.subType;
+                stats[key] = (stats[key] || 0) + 1;
+            });
+
+            chartInstances['type'] = new Chart(ctx, {
+                type: 'bar',
                 data: {
-                    labels: sortedDates.map(d => d.slice(5)),
-                    datasets: [{ label: '小時', data: sortedDates.map(d => dailyHours[d]), borderColor: '#e6748e', backgroundColor: 'rgba(230,116,142,0.1)', fill: true, tension: 0.3 }]
+                    labels: Object.keys(stats),
+                    datasets: [{
+                        label: '服務筆數',
+                        data: Object.values(stats),
+                        backgroundColor: '#4a90e2',
+                        borderRadius: 4
+                    }]
                 },
                 options: {
-                    responsive: true, maintainAspectRatio: false, animation: false,
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
-                    scales: { x: { ticks: { font: { size: 10 } } } }
+                    scales: { x: { beginAtZero: true } }
                 }
             });
         }
 
-        // 匯出 CSV 檔
-        function exportCSV() {
-            let csvContent = "\uFEFF日期,節次,地點,服務時間(分),人員/對象,服務對象,間接服務大項,間接服務細項,摘要\n";
+        function renderPlaceChart() {
+            const ctx = document.getElementById('chart-place').getContext('2d');
+            if (chartInstances['place']) chartInstances['place'].destroy();
+
+            const stats = {};
             records.forEach(r => {
-                csvContent += `"${r.date}","${r.period}","${r.place}","${r.minutes}","${r.students}","${r.target}","${r.mainType || ''}","${r.subType || ''}","${r.summary.replace(/"/g, '""')}"\n`;
+                const p = r.place || '未填寫';
+                stats[p] = (stats[p] || 0) + (r.minutes / 60);
             });
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+
+            chartInstances['place'] = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(stats),
+                    datasets: [{
+                        data: Object.values(stats),
+                        backgroundColor: PALETTE
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        }
+
+        function renderDailyChart() {
+            const ctx = document.getElementById('chart-daily').getContext('2d');
+            if (chartInstances['daily']) chartInstances['daily'].destroy();
+
+            const stats = {};
+            records.forEach(r => {
+                stats[r.date] = (stats[r.date] || 0) + (r.minutes / 60);
+            });
+
+            const sortedDates = Object.keys(stats).sort();
+
+            chartInstances['daily'] = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: sortedDates,
+                    datasets: [{
+                        label: '每日累積服務時數 (小時)',
+                        data: sortedDates.map(d => stats[d]),
+                        borderColor: '#4a90e2',
+                        backgroundColor: 'rgba(74, 144, 226, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+
+        // 📤 匯出功能
+        function exportCSV() {
+            let csv = "\uFEFF日期,節次,地點,服務分鐘數,服務對象,人員,服務主類別,服務細項目,服務摘要\n";
+            records.forEach(r => {
+                csv += `"${r.date}","${r.period || ''}","${r.place || ''}","${r.minutes}","${r.target}","${r.students}","${r.mainType}","${r.subType}","${(r.summary || '').replace(/"/g, '""')}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = "間接服務紀錄表.csv";
+            link.download = `間接服務紀錄明細_${new Date().toISOString().slice(0,10)}.csv`;
             link.click();
         }
 
-        // 匯出 Word 簽核報表
         function exportWord() {
-            let rows = records.map(r => `
-                <tr>
-                    <td>${r.date}<br><span style="font-size:10pt;color:#666;">${r.period}</span></td>
-                    <td>${r.place}</td>
-                    <td>${r.minutes} 分</td>
-                    <td>${r.students}<br><span style="font-size:10pt;color:#666;">${r.target}</span></td>
-                    <td><b>${r.mainType || ''}</b><br><span style="font-size:10pt;color:#e6748e;">${r.subType || ''}</span></td>
-                    <td>${r.summary}</td>
-                </tr>
-            `).join('');
-
-            const htmlContent = `
+            let html = `
                 <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-                <head>
-                    <meta charset='utf-8'>
-                    <title>間接服務紀錄簽核報表</title>
-                    <style>
-                        @page Section1 { size: 841.8pt 595.3pt; mso-page-orientation: landscape; margin: 1.5cm; }
-                        div.Section1 { page: Section1; }
-                        body { font-family: "標楷體", "Microsoft JhengHei", sans-serif; font-size: 12pt; }
-                        h2 { text-align: center; font-size: 16pt; margin-bottom: 15px; }
-                        table { border-collapse: collapse; width: 100%; margin-top: 10px; }
-                        th, td { border: 1pt solid black; padding: 6pt; font-size: 12pt; text-align: left; vertical-align: top; }
-                        th { background-color: #f2f2f2; text-align: center; }
-                        .sign-area { margin-top: 40px; width: 100%; }
-                        .sign-table { border: none; width: 100%; }
-                        .sign-table td { border: none; font-size: 12pt; padding: 10pt 0; }
-                    </style>
+                <head><meta charset='utf-8'><title>間接服務紀錄報表</title>
+                <style>
+                    body { font-family: '微軟正黑體', sans-serif; font-size: 12pt; }
+                    table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+                    th, td { border: 1px solid #000; padding: 6px; text-align: left; font-size: 12pt; }
+                    th { background-color: #f2f2f2; }
+                    h2 { text-align: center; }
+                </style>
                 </head>
                 <body>
-                    <div class="Section1">
-                        <h2>間接服務紀錄簽核報表</h2>
-                        <table>
-                            <thead>
+                    <h2>特殊教育間接服務紀錄備查表</h2>
+                    <p>列印日期：${new Date().toLocaleDateString()}</p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>日期/節次</th>
+                                <th>地點</th>
+                                <th>時數(分)</th>
+                                <th>對象/人員</th>
+                                <th>服務項目</th>
+                                <th>服務摘要</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${records.map(r => `
                                 <tr>
-                                    <th style="width:12%;">日期/節次</th>
-                                    <th style="width:10%;">地點</th>
-                                    <th style="width:8%;">時間</th>
-                                    <th style="width:18%;">人員/對象</th>
-                                    <th style="width:20%;">服務類型 (大項/細項)</th>
-                                    <th style="width:32%;">服務內容摘要</th>
+                                    <td>${r.date}<br>${r.period || ''}</td>
+                                    <td>${r.place || ''}</td>
+                                    <td>${r.minutes}</td>
+                                    <td>${r.students}<br>(${r.target})</td>
+                                    <td>${r.mainType}<br>${r.subType}</td>
+                                    <td>${r.summary || ''}</td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                ${rows}
-                            </tbody>
-                        </table>
-                        <div class="sign-area">
-                            <table class="sign-table">
-                                <tr>
-                                    <td style="width:33%;">填表教師簽章：__________________</td>
-                                    <td style="width:33%;">督導簽章：__________________</td>
-                                    <td style="width:34%;">校長/主管簽章：__________________</td>
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
+                            `).join('')}
+                        </tbody>
+                    </table>
                 </body>
                 </html>
             `;
 
-            const blob = new Blob(['\ufeff' + htmlContent], { type: 'application/msword' });
+            const blob = new Blob([html], { type: 'application/msword' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = "間接服務紀錄簽核報表.doc";
+            link.download = `間接服務簽核報表_${new Date().toISOString().slice(0,10)}.doc`;
             link.click();
         }
     </script>
