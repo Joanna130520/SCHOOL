@@ -22,7 +22,6 @@
             font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Microsoft JhengHei", sans-serif;
         }
         
-        /* 晶片與按鈕樣式 */
         .chip { transition: all 0.15s ease-in-out; }
         .chip-active { 
             background-color: #2563eb !important; 
@@ -51,12 +50,17 @@
             width: 90%;
         }
 
-        /* 導覽頁籤 Active 樣式 */
         .nav-tab-active {
             background-color: #ffffff !important;
             color: #1e40af !important;
             font-weight: 800 !important;
             box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+
+        .time-tab-active {
+            background-color: #2563eb !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
         }
     </style>
 </head>
@@ -84,7 +88,7 @@
                         <i class="fa-solid fa-clock-rotate-left text-2xl text-blue-200"></i>
                         <h1 class="text-lg sm:text-xl font-black tracking-wide whitespace-nowrap">間接服務系統</h1>
                     </div>
-                    <!-- 頁籤按鈕 (針對手機端擴大點擊區域) -->
+                    <!-- 頁籤按鈕 -->
                     <div class="flex w-full sm:w-auto justify-around sm:justify-start bg-blue-800/60 p-1 rounded-xl space-x-1">
                         <button id="nav-btn-service" onclick="switchPage('indirect-service')" class="flex-1 sm:flex-none px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 nav-tab-active">
                             <i class="fa-solid fa-pen-to-square"></i> 間接服務
@@ -116,7 +120,7 @@
         <!-- 主要內容區 -->
         <main class="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-6 flex-1 w-full">
 
-            <!-- PAGE 1: 間接服務頁面 (單純表單區，提升全平台填寫舒適度) -->
+            <!-- PAGE 1: 間接服務頁面 -->
             <div id="page-indirect-service" class="max-w-3xl mx-auto">
                 <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-7">
                     <h2 class="text-xl font-black text-slate-800 border-b-2 border-slate-100 pb-3 mb-5 flex items-center gap-2">
@@ -127,7 +131,7 @@
                     <form id="record-form" onsubmit="handleFormSubmit(event)" class="space-y-5">
                         <input type="hidden" id="edit-id" value="">
 
-                        <!-- 日期 & 時數 (手機單欄 / 電腦雙欄) -->
+                        <!-- 日期 & 時數 -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-bold text-slate-700 mb-1.5">日期 <span class="text-rose-500">*</span></label>
@@ -145,7 +149,7 @@
                             </div>
                         </div>
 
-                        <!-- 節次選擇 (加大觸控面積) -->
+                        <!-- 節次選擇 -->
                         <div>
                             <label class="block text-sm font-bold text-slate-700 mb-1.5">節次 (可多選)</label>
                             <div class="flex flex-wrap gap-2" id="period-chips">
@@ -174,7 +178,7 @@
                             <input type="text" id="input-place" placeholder="請輸入地點" class="w-full px-3.5 py-2.5 border-2 border-slate-200 rounded-xl text-base font-medium text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                         </div>
 
-                        <!-- 資源班學生/人員 (全平台自適應多欄網格) -->
+                        <!-- 資源班學生/人員 -->
                         <div>
                             <label class="block text-sm font-bold text-slate-700 mb-1.5">資源班學生 / 老師 / 家長</label>
                             <div class="max-h-48 overflow-y-auto border-2 border-slate-200 rounded-xl p-2.5 bg-slate-50 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5 mb-2.5" id="student-chips"></div>
@@ -233,13 +237,53 @@
                 </section>
             </div>
 
-            <!-- PAGE 2: 間接服務統計頁面 (獨立高對比報表) -->
+            <!-- PAGE 2: 間接服務統計頁面 (時間篩選控制區) -->
             <div id="page-indirect-stats" class="hidden space-y-6">
+
+                <!-- 🌟 時間範圍選擇器工具列 -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <i class="fa-solid fa-calendar-days text-blue-600 text-xl"></i>
+                        <span class="font-black text-slate-800 text-base">時間區間篩選：</span>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                        <!-- 3個時間維度切換按鈕 -->
+                        <div class="flex bg-slate-100 p-1 rounded-xl w-full sm:w-auto justify-center">
+                            <button type="button" id="time-tab-day" onclick="setTimeFilterMode('day')" class="px-3.5 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition text-slate-700">
+                                每日紀錄
+                            </button>
+                            <button type="button" id="time-tab-month" onclick="setTimeFilterMode('month')" class="px-3.5 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition text-slate-700 time-tab-active">
+                                每月紀錄
+                            </button>
+                            <button type="button" id="time-tab-year" onclick="setTimeFilterMode('year')" class="px-3.5 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition text-slate-700">
+                                每年紀錄
+                            </button>
+                        </div>
+
+                        <!-- 對應的日期/月份/年份選擇器 -->
+                        <div class="w-full sm:w-auto">
+                            <!-- 每日：日期選擇器 -->
+                            <input type="date" id="stats-date-picker" onchange="renderAllCharts()" class="hidden w-full sm:w-auto px-3.5 py-1.5 border-2 border-slate-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none">
+                            
+                            <!-- 每月：月份選擇器 (預設載入時選取當月) -->
+                            <input type="month" id="stats-month-picker" onchange="renderAllCharts()" class="w-full sm:w-auto px-3.5 py-1.5 border-2 border-slate-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none">
+                            
+                            <!-- 每年：年份下拉選單 -->
+                            <select id="stats-year-picker" onchange="renderAllCharts()" class="hidden w-full sm:w-auto px-3.5 py-1.5 border-2 border-slate-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- 全校總體 KPI 卡片 -->
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6">
-                    <h2 class="text-lg font-black text-slate-800 mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-chart-pie text-blue-600"></i>
-                        <span>全校服務總體統計</span>
+                    <h2 class="text-lg font-black text-slate-800 mb-4 flex items-center justify-between">
+                        <span class="flex items-center gap-2">
+                            <i class="fa-solid fa-chart-pie text-blue-600"></i>
+                            <span>全校服務總體統計</span>
+                        </span>
+                        <span class="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200" id="current-filter-label">當月紀錄</span>
                     </h2>
 
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -308,7 +352,7 @@
                     </div>
                 </div>
 
-                <!-- 四大統計圖表 (響應式 1 欄 / 2 欄切換) -->
+                <!-- 四大統計圖表 -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5">
                         <h3 class="text-xs font-black text-slate-500 uppercase tracking-wider mb-3">服務對象分布</h3>
@@ -347,7 +391,7 @@
                 </div>
             </div>
 
-            <!-- PAGE 3: 間接服務紀錄頁面 (歷史紀錄明細高對比表格) -->
+            <!-- PAGE 3: 間接服務紀錄頁面 -->
             <div id="page-indirect-record" class="hidden">
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 pb-4 mb-4 gap-3">
@@ -447,6 +491,9 @@
         let currentAnalysisMode = 'all'; 
         let serviceChartMode = 'main'; 
 
+        // 🌟 時間篩選狀態：'day', 'month', 'year' (預設 'month')
+        let timeFilterMode = 'month';
+
         function checkPassword() {
             const input = document.getElementById('pwd-input').value;
             if (input === TARGET_PASSWORD) {
@@ -511,10 +558,83 @@
                 saveData();
             }
             document.getElementById('input-date').valueAsDate = new Date();
+            
+            // 初始化時間篩選器選項 (預設為當月)
+            initTimePickers();
+
             updateSubTypes();
             renderStudentChips();
             renderStudentFilterOptions();
             renderApp();
+        }
+
+        // 🌟 初始化日期與年份下拉選單 (預設選取當月與今年)
+        function initTimePickers() {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+
+            document.getElementById('stats-date-picker').value = `${yyyy}-${mm}-${dd}`;
+            document.getElementById('stats-month-picker').value = `${yyyy}-${mm}`;
+
+            // 產生年份選單 (前5年至後2年)
+            const yearSelect = document.getElementById('stats-year-picker');
+            yearSelect.innerHTML = '';
+            for (let y = yyyy - 5; y <= yyyy + 2; y++) {
+                yearSelect.innerHTML += `<option value="${y}" ${y === yyyy ? 'selected' : ''}>${y} 年</option>`;
+            }
+        }
+
+        // 🌟 切換時間維度按鈕 (日 / 月 / 年)
+        function setTimeFilterMode(mode) {
+            timeFilterMode = mode;
+            const btnDay = document.getElementById('time-tab-day');
+            const btnMonth = document.getElementById('time-tab-month');
+            const btnYear = document.getElementById('time-tab-year');
+
+            const pickerDay = document.getElementById('stats-date-picker');
+            const pickerMonth = document.getElementById('stats-month-picker');
+            const pickerYear = document.getElementById('stats-year-picker');
+
+            btnDay.classList.remove('time-tab-active');
+            btnMonth.classList.remove('time-tab-active');
+            btnYear.classList.remove('time-tab-active');
+
+            pickerDay.classList.add('hidden');
+            pickerMonth.classList.add('hidden');
+            pickerYear.classList.add('hidden');
+
+            if (mode === 'day') {
+                btnDay.classList.add('time-tab-active');
+                pickerDay.classList.remove('hidden');
+            } else if (mode === 'month') {
+                btnMonth.classList.add('time-tab-active');
+                pickerMonth.classList.remove('hidden');
+            } else if (mode === 'year') {
+                btnYear.classList.add('time-tab-active');
+                pickerYear.classList.remove('hidden');
+            }
+
+            renderAllCharts();
+        }
+
+        // 🌟 核心過濾：取得當前時間篩選下的紀錄資料庫
+        function getFilteredRecords() {
+            if (timeFilterMode === 'day') {
+                const targetDay = document.getElementById('stats-date-picker').value.replace(/-/g, '/');
+                document.getElementById('current-filter-label').innerText = `紀錄日期：${targetDay}`;
+                return records.filter(r => r.date === targetDay);
+            } else if (timeFilterMode === 'month') {
+                const targetMonth = document.getElementById('stats-month-picker').value.replace(/-/g, '/');
+                document.getElementById('current-filter-label').innerText = `紀錄月份：${targetMonth}`;
+                return records.filter(r => r.date.startsWith(targetMonth));
+            } else if (timeFilterMode === 'year') {
+                const targetYear = document.getElementById('stats-year-picker').value;
+                document.getElementById('current-filter-label').innerText = `紀錄年份：${targetYear} 年`;
+                return records.filter(r => r.date.startsWith(targetYear));
+            }
+            return records;
         }
 
         function saveData() {
@@ -663,14 +783,7 @@
         function renderApp() {
             records.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-            const totalCount = records.length;
-            const totalMinutes = records.reduce((acc, cur) => acc + (parseInt(cur.minutes) || 0), 0);
-            const totalPeriods = (totalMinutes / 60).toFixed(1);
-
-            document.getElementById('kpi-count').innerText = totalCount;
-            document.getElementById('kpi-minutes').innerHTML = `${totalMinutes} <span class="text-sm font-bold">分</span>`;
-            document.getElementById('kpi-periods').innerHTML = `${totalPeriods} <span class="text-sm font-bold">節</span>`;
-
+            // 渲染明細表格 (始終顯示完整紀錄)
             const tbody = document.getElementById('table-body');
             tbody.innerHTML = records.map(r => `
                 <tr class="hover:bg-blue-50/50 transition">
@@ -699,12 +812,25 @@
             renderAllCharts();
         }
 
+        // 🌟 依時間篩選條件繪製所有統計與 KPI
         function renderAllCharts() {
-            renderAnalysisChart();
-            renderTargetChart();
-            renderTypeChart();
-            renderPlaceChart();
-            renderDailyChart();
+            const filtered = getFilteredRecords();
+
+            // 1. KPI
+            const totalCount = filtered.length;
+            const totalMinutes = filtered.reduce((acc, cur) => acc + (parseInt(cur.minutes) || 0), 0);
+            const totalPeriods = (totalMinutes / 60).toFixed(1);
+
+            document.getElementById('kpi-count').innerText = totalCount;
+            document.getElementById('kpi-minutes').innerHTML = `${totalMinutes} <span class="text-sm font-bold">分</span>`;
+            document.getElementById('kpi-periods').innerHTML = `${totalPeriods} <span class="text-sm font-bold">節</span>`;
+
+            // 2. 繪製圖表
+            renderAnalysisChart(filtered);
+            renderTargetChart(filtered);
+            renderTypeChart(filtered);
+            renderPlaceChart(filtered);
+            renderDailyChart(filtered);
         }
 
         function switchAnalysisMode(mode) {
@@ -725,17 +851,18 @@
                 headerAll.classList.add('hidden');
                 controlsSingle.classList.remove('hidden');
             }
-            renderAnalysisChart();
+            renderAnalysisChart(getFilteredRecords());
         }
 
-        function renderAnalysisChart() {
+        function renderAnalysisChart(currentRecords) {
+            const filtered = currentRecords || getFilteredRecords();
             const ctx = document.getElementById('chart-analysis').getContext('2d');
             if (chartInstances['analysis']) chartInstances['analysis'].destroy();
 
             if (currentAnalysisMode === 'all') {
                 const studentStats = {};
                 STUDENT_LIST.forEach(s => studentStats[s] = 0);
-                records.forEach(r => {
+                filtered.forEach(r => {
                     STUDENT_LIST.forEach(s => {
                         if (r.students && r.students.includes(s)) {
                             studentStats[s] += (r.minutes / 60);
@@ -766,10 +893,10 @@
                 });
             } else {
                 const selectedStudent = document.getElementById('student-filter').value;
-                const filtered = records.filter(r => r.students && r.students.includes(selectedStudent));
+                const studentFiltered = filtered.filter(r => r.students && r.students.includes(selectedStudent));
                 
-                const count = filtered.length;
-                const minutes = filtered.reduce((a, c) => a + c.minutes, 0);
+                const count = studentFiltered.length;
+                const minutes = studentFiltered.reduce((a, c) => a + c.minutes, 0);
                 const suggestedPeriods = (minutes / 60).toFixed(1);
 
                 document.getElementById('stu-kpi-count').innerText = count;
@@ -777,7 +904,7 @@
                 document.getElementById('stu-kpi-periods').innerHTML = `${suggestedPeriods} <span class="text-xs font-bold">節</span>`;
 
                 const typeStats = {};
-                filtered.forEach(r => {
+                studentFiltered.forEach(r => {
                     typeStats[r.mainType] = (typeStats[r.mainType] || 0) + (r.minutes / 60);
                 });
 
@@ -802,12 +929,12 @@
             }
         }
 
-        function renderTargetChart() {
+        function renderTargetChart(filtered) {
             const ctx = document.getElementById('chart-target').getContext('2d');
             if (chartInstances['target']) chartInstances['target'].destroy();
 
             const targetCounts = {};
-            records.forEach(r => {
+            filtered.forEach(r => {
                 targetCounts[r.target] = (targetCounts[r.target] || 0) + 1;
             });
 
@@ -840,15 +967,15 @@
             serviceChartMode = mode;
             document.getElementById('btn-service-main').className = mode === 'main' ? 'px-2.5 py-1 text-xs font-bold rounded transition bg-blue-600 text-white' : 'px-2.5 py-1 text-xs font-bold rounded transition text-slate-700 hover:text-slate-900';
             document.getElementById('btn-service-sub').className = mode === 'sub' ? 'px-2.5 py-1 text-xs font-bold rounded transition bg-blue-600 text-white' : 'px-2.5 py-1 text-xs font-bold rounded transition text-slate-700 hover:text-slate-900';
-            renderTypeChart();
+            renderTypeChart(getFilteredRecords());
         }
 
-        function renderTypeChart() {
+        function renderTypeChart(filtered) {
             const ctx = document.getElementById('chart-type').getContext('2d');
             if (chartInstances['type']) chartInstances['type'].destroy();
 
             const stats = {};
-            records.forEach(r => {
+            filtered.forEach(r => {
                 const key = serviceChartMode === 'main' ? r.mainType : r.subType;
                 stats[key] = (stats[key] || 0) + 1;
             });
@@ -877,12 +1004,12 @@
             });
         }
 
-        function renderPlaceChart() {
+        function renderPlaceChart(filtered) {
             const ctx = document.getElementById('chart-place').getContext('2d');
             if (chartInstances['place']) chartInstances['place'].destroy();
 
             const stats = {};
-            records.forEach(r => {
+            filtered.forEach(r => {
                 const p = r.place || '未填寫';
                 stats[p] = (stats[p] || 0) + (r.minutes / 60);
             });
@@ -904,12 +1031,12 @@
             });
         }
 
-        function renderDailyChart() {
+        function renderDailyChart(filtered) {
             const ctx = document.getElementById('chart-daily').getContext('2d');
             if (chartInstances['daily']) chartInstances['daily'].destroy();
 
             const stats = {};
-            records.forEach(r => {
+            filtered.forEach(r => {
                 stats[r.date] = (stats[r.date] || 0) + (r.minutes / 60);
             });
 
