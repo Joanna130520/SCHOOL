@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>間接服務系統 (質感沙藍粉調版)</title>
+    <title>間接服務系統 (沙藍粉質感版)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js -->
@@ -25,7 +25,6 @@
             color: var(--deep-navy);
         }
 
-        /* 晶片與按鈕樣式 */
         .chip { transition: all 0.15s ease-in-out; }
         .chip-active { 
             background-color: var(--deep-navy) !important; 
@@ -70,6 +69,9 @@
 </head>
 <body class="min-h-screen antialiased">
 
+    <!-- 隱藏的檔案上傳輸入框（用於備份復原） -->
+    <input type="file" id="import-file-input" accept=".json" class="hidden" onchange="handleFileImport(event)">
+
     <!-- 🔐 密碼驗證畫面 -->
     <div id="login-overlay">
         <div class="login-card border border-[#CBB6A2]">
@@ -106,15 +108,21 @@
                     </div>
                 </div>
 
-                <!-- 匯出與登出按鈕 -->
-                <div class="flex items-center space-x-2 w-full md:w-auto justify-end border-t border-white/20 pt-2 md:pt-0 md:border-none">
-                    <button onclick="exportWord()" class="bg-[#D7B7C2] hover:bg-[#c9a3b0] text-[#1F2A36] px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition flex items-center gap-1 shadow-sm border border-[#CBB6A2]">
+                <!-- 資料備份匯入與匯出按鈕 -->
+                <div class="flex flex-wrap items-center space-x-1.5 w-full md:w-auto justify-end border-t border-white/20 pt-2 md:pt-0 md:border-none">
+                    <button onclick="triggerImport()" class="bg-[#E7DCCF] hover:bg-[#d9cbbd] text-[#1F2A36] px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-sm" title="從備份檔復原資料">
+                        <i class="fa-solid fa-file-import"></i> 匯入備份
+                    </button>
+                    <button onclick="exportBackupJSON()" class="bg-[#CBB6A2] hover:bg-[#b8a18c] text-[#1F2A36] px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-sm" title="下載完整資料備份">
+                        <i class="fa-solid fa-floppy-disk"></i> 備份資料
+                    </button>
+                    <button onclick="exportWord()" class="bg-[#D7B7C2] hover:bg-[#c9a3b0] text-[#1F2A36] px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-sm">
                         <i class="fa-solid fa-file-word"></i> 匯出 Word
                     </button>
-                    <button onclick="exportCSV()" class="bg-[#C9DCE6] hover:bg-[#b4d0df] text-[#1F2A36] px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition flex items-center gap-1 shadow-sm border border-[#a4c5d6]">
+                    <button onclick="exportCSV()" class="bg-[#C9DCE6] hover:bg-[#b4d0df] text-[#1F2A36] px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-sm">
                         <i class="fa-solid fa-file-excel"></i> 匯出 CSV
                     </button>
-                    <button onclick="logout()" class="bg-[#CBB6A2]/30 hover:bg-[#CBB6A2]/50 text-white px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition flex items-center gap-1 ml-1" title="登出系統">
+                    <button onclick="logout()" class="bg-white/10 hover:bg-white/20 text-white px-2 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 ml-1" title="登出系統">
                         <i class="fa-solid fa-right-from-bracket"></i>
                     </button>
                 </div>
@@ -203,8 +211,8 @@
                                 <option value="普通班導師/教師">普通班導師/教師</option>
                                 <option value="行政人員">行政人員</option>
                                 <option value="學生家長">學生家長</option>
-                                <option value="專業團隊 (物理治療、心理治療、職能治療、語言治療)">專業團隊 (物理治療、心理治療、職能治療、語言治療)</option>
-                                <option value="鹿港國中中轉學生及老師及家長">鹿港國中中轉學生及老師及家長</option>
+                                <option value="專業團隊(物理治療、心理治療、職能治療、語言治療)">專業團隊(物理治療、心理治療、職能治療、語言治療)</option>
+                                <option value="鹿港國中特殊學生及老師及家長">鹿港國中特殊學生及老師及家長</option>
                                 <option value="其他">其他</option>
                             </select>
                         </div>
@@ -413,28 +421,31 @@
                                 <i class="fa-solid fa-list-check text-[#1F2A36]"></i>
                                 <span>間接服務紀錄明細表</span>
                             </h2>
-                            <p class="text-xs font-medium text-slate-500 mt-1">完整歷史紀錄清單，點擊右側按鈕可直接進行編輯或刪除。</p>
+                            <p class="text-xs font-medium text-slate-500 mt-1">完整歷史紀錄清單，可直接進行編輯、刪除或一鍵清空。</p>
                         </div>
 
-                        <!-- 排序控制選單 -->
-                        <div class="flex flex-wrap items-center gap-2 bg-[#E7DCCF]/50 p-2 rounded-xl border border-[#CBB6A2]/50 w-full md:w-auto">
-                            <span class="text-xs font-black text-[#1F2A36] flex items-center gap-1">
-                                <i class="fa-solid fa-arrow-down-up-wide text-[#1F2A36]"></i> 排序設定：
-                            </span>
-
-                            <select id="sort-field-picker" onchange="renderApp()" class="px-2.5 py-1 border-2 border-[#CBB6A2] rounded-lg text-xs font-bold text-[#1F2A36] focus:ring-2 focus:ring-[#1F2A36] outline-none bg-white">
-                                <option value="date">依 日期 排序</option>
-                                <option value="minutes">依 服務時數 排序</option>
-                                <option value="place">依 地點 排序</option>
-                                <option value="target">依 服務對象 排序</option>
-                                <option value="mainType">依 服務類型 排序</option>
-                                <option value="result">依 服務成效 排序</option>
-                            </select>
-
-                            <select id="sort-order-picker" onchange="renderApp()" class="px-2.5 py-1 border-2 border-[#CBB6A2] rounded-lg text-xs font-bold text-[#1F2A36] focus:ring-2 focus:ring-[#1F2A36] outline-none bg-white">
-                                <option value="desc">遞減 (大到小 / 新到舊)</option>
-                                <option value="asc">遞增 (小到大 / 舊到新)</option>
-                            </select>
+                        <!-- 操作按鈕與排序選單 -->
+                        <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
+                            <button onclick="clearAllData()" class="bg-rose-500 hover:bg-rose-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-sm">
+                                <i class="fa-solid fa-trash-can"></i> 清空所有資料
+                            </button>
+                            <button onclick="restorePDFData()" class="bg-[#1F2A36] hover:bg-[#2c3b4d] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-sm" title="恢復PDF原始12筆紀錄">
+                                <i class="fa-solid fa-rotate-left"></i> 復原預設資料
+                            </button>
+                            <div class="flex items-center gap-1.5 bg-[#E7DCCF]/50 p-1.5 rounded-xl border border-[#CBB6A2]/50">
+                                <select id="sort-field-picker" onchange="renderApp()" class="px-2 py-1 border border-[#CBB6A2] rounded-lg text-xs font-bold text-[#1F2A36] outline-none bg-white">
+                                    <option value="date">依 日期</option>
+                                    <option value="minutes">依 服務時數</option>
+                                    <option value="place">依 地點</option>
+                                    <option value="target">依 服務對象</option>
+                                    <option value="mainType">依 服務類型</option>
+                                    <option value="result">依 服務成效</option>
+                                </select>
+                                <select id="sort-order-picker" onchange="renderApp()" class="px-2 py-1 border border-[#CBB6A2] rounded-lg text-xs font-bold text-[#1F2A36] outline-none bg-white">
+                                    <option value="desc">遞減 (新到舊)</option>
+                                    <option value="asc">遞增 (舊到新)</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
@@ -444,11 +455,11 @@
                                 <tr>
                                     <th class="p-3 whitespace-nowrap">日期/節次</th>
                                     <th class="p-3 whitespace-nowrap">地點</th>
-                                    <th class="p-3 whitespace-nowrap">時間 (分)</th>
-                                    <th class="p-3">人員/對象</th>
-                                    <th class="p-3">類型/項目</th>
-                                    <th class="p-3 whitespace-nowrap">服務成效</th>
-                                    <th class="p-3">摘要</th>
+                                    <th class="p-3 whitespace-nowrap">時間(分)</th>
+                                    <th class="p-3">資源班學生/老師/家長</th>
+                                    <th class="p-3">服務對象</th>
+                                    <th class="p-3">間接服務類型與項目</th>
+                                    <th class="p-3">服務內容摘要</th>
                                     <th class="p-3 text-center whitespace-nowrap">操作</th>
                                 </tr>
                             </thead>
@@ -502,20 +513,27 @@
             ]
         };
 
-        const STUDENT_LIST = ["102 陳O芯", "104 許O棠", "106 許O瑀", "108 黃O瑞", "110 蔡O昌", "111 陳O豪", "113 張O峻", "114 巫O升", "201 劉O兆", "207 洪O恩", "209 鄭O煜", "215 張O恩", "301 廖O宇", "303 吳O誠", "304 吳O恩", "307 陳O禎", "311 黃O甫", "314 卓O諺", "314 鍾O軒", "315 戴O承", "315 林O成", "315 賴O睿", "315 鍾O靖"];
+        const STUDENT_LIST = ["102 陳以芯", "104 許貴棠", "106 許芝瑀", "108 黃泊瑞", "110 蔡宜昌", "111 陳O豪", "113 張豐峻", "114 巫O升", "201 劉恩兆", "207 洪O恩", "209 鄭O煜", "215 張O恩", "301 廖 宇", "303 吳O誠", "304 吳O恩", "307 陳睿禎", "311 黃政莆", "314 卓O諺", "314 鍾O軒", "315 戴O承", "315 林威成", "315 賴O睿", "315 鍾O靖"];
 
-        // 🌟 沙米藍粉色調圖表調色盤
         const PALETTE = ['#1F2A36', '#D7B7C2', '#C9DCE6', '#CBB6A2', '#87495b', '#56728c', '#a4c5d6'];
 
+        // 📄 根據 PDF 檔案 100% 精準還原之 12 筆資料
         const INITIAL_DATA = [
-            { id: "1", date: "2026/10/01", period: "第一節, 第二節, 第三節", place: "多元教室", minutes: 180, students: "108 黃O瑞, 201 劉O兆, 311 黃O甫", target: "專業團隊 (物理治療、心理治療、職能治療、語言治療)", mainType: "1. 需求評估與處理", subType: "1-4 專業團隊服務的規劃與合作", result: "持續進行", summary: "職能治療課程" },
-            { id: "2", date: "2026/10/05", period: "第六節", place: "個諮室", minutes: 60, students: "106 許O瑀", target: "資源班學生", mainType: "2. 個別晤談與指導", subType: "2-1 個別晤談", result: "持續進行", summary: "國中時期曾有遭受同學霸凌的經驗，對向師長求助有所顧慮。" },
-            { id: "3", date: "2026/10/06", period: "第六節, 第七節", place: "團體諮商室", minutes: 120, students: "113 張O峻, 201 劉O兆", target: "專業團隊 (物理治療、心理治療、職能治療、語言治療)", mainType: "1. 需求評估與處理", subType: "1-4 專業團隊服務的規劃與合作", result: "持續進行", summary: "語言治療課程" },
-            { id: "4", date: "2026/10/12", period: "第六節, 第七節", place: "多元教室", minutes: 120, students: "113 張O峻, 201 劉O兆", target: "專業團隊 (物理治療、心理治療、職能治療、語言治療)", mainType: "1. 需求評估與處理", subType: "1-4 專業團隊服務的規劃與合作", result: "持續進行", summary: "語言治療課程" },
-            { id: "5", date: "2026/10/22", period: "第六節, 第七節", place: "輔導室", minutes: 120, students: "104 許O棠, 110 蔡O昌", target: "專業團隊 (物理治療、心理治療、職能治療、語言治療)", mainType: "1. 需求評估與處理", subType: "1-4 專業團隊服務的規劃與合作", result: "持續進行", summary: "語言治療課程" },
-            { id: "6", date: "2026/10/19", period: "第三節", place: "多功能會議廳5F", minutes: 60, students: "102 陳O芯", target: "專業團隊 (物理治療、心理治療、職能治療、語言治療)", mainType: "1. 需求評估與處理", subType: "1-4 專業團隊服務的規劃與合作", result: "持續進行", summary: "物理治療課程" },
-            { id: "7", date: "2026/10/22", period: "第二節, 第三節, 第四節", place: "第一會議室5F", minutes: 180, students: "108 黃O瑞, 201 劉O兆", target: "普通班學生", mainType: "5. 其它", subType: "5-3 特殊教育宣導", result: "已結案 / 完成", summary: "入班宣導_國立彰化師範大學教授 - 洪雅惠教授" },
-            { id: "8", date: "2026/10/29", period: "第二節, 第三節, 第四節", place: "第三會議室6F", minutes: 180, students: "102 陳O芯, 207 洪O恩, 209 鄭O煜", target: "普通班學生", mainType: "5. 其它", subType: "5-3 特殊教育宣導", result: "已結案 / 完成", summary: "入班宣導_國立彰化師範大學教授 - 林千惠教授" }
+            { id: "1", date: "2026/10/01", period: "第一節,第二節,第三節", place: "多元教室", minutes: 180, students: "108 黃泊瑞,201劉恩兆,311 黃政莆", target: "專業團隊(物理治療、心理治療、職能治療、語言治療)", mainType: "1. 需求評估與處理", subType: "1-4 專業團隊服務的規劃與合作", result: "持續進行", summary: "職能治療課程" },
+            { id: "2", date: "2026/10/05", period: "第六節", place: "多元教室", minutes: 60, students: "106許芝瑀", target: "資源班學生", mainType: "2. 個別晤談與指導", subType: "2-1 個別晤談", result: "持續進行", summary: "國中時期曾有遭受同儕霸凌的經驗,當時雖曾向老師反映,但相關情況未獲得妥善處理,因此在面對目前的人際互動問題時,較容易感到擔心與不安,也對向師長求助有所顧慮。" },
+            { id: "3", date: "2026/10/06", period: "第六節,第七節", place: "多元教室", minutes: 120, students: "113張豐峻,201劉恩兆", target: "專業團隊(物理治療、心理治療、職能治療、語言治療)", mainType: "1. 需求評估與處理", subType: "1-4 專業團隊服務的規劃與合作", result: "持續進行", summary: "語言治療課程" },
+            { id: "4", date: "2026/10/12", period: "第六節,第七節", place: "多元教室", minutes: 120, students: "113張豐峻,201劉恩兆", target: "專業團隊(物理治療、心理治療、職能治療、語言治療)", mainType: "1. 需求評估與處理", subType: "1-4 專業團隊服務的規劃與合作", result: "持續進行", summary: "語言治療課程" },
+            { id: "5", date: "2026/10/22", period: "第六節,第七節", place: "多元教室", minutes: 120, students: "104 許貴棠,110 蔡宜昌", target: "專業團隊(物理治療、心理治療、職能治療、語言治療)", mainType: "1. 需求評估與處理", subType: "1-4 專業團隊服務的規劃與合作", result: "持續進行", summary: "語言治療課程" },
+            { id: "6", date: "2026/10/19", period: "第三節", place: "多元教室", minutes: 60, students: "102 陳以芯", target: "專業團隊(物理治療、心理治療、職能治療、語言治療)", mainType: "1. 需求評估與處理", subType: "1-4 專業團隊服務的規劃與合作", result: "持續進行", summary: "物理治療課程" },
+            { id: "7", date: "2026/10/22", period: "第二節,第三節,第四節", place: "第三會議室 6F", minutes: 180, students: "108、201班同學", target: "普通班學生", mainType: "5. 其它", subType: "5-3 特殊教育宣導", result: "已結案 / 完成", summary: "入班宣導_國立彰化師範大學教授-洪雅惠教授" },
+            { id: "8", date: "2026/10/29", period: "第二節,第三節,第四節", place: "第三會議室 6F", minutes: 180, students: "102、207、209班同學", target: "普通班學生", mainType: "5. 其它", subType: "5-3 特殊教育宣導", result: "已結案 / 完成", summary: "入班宣導國立彰化師範大學教授-林千惠教授" },
+            { id: "9", date: "2026/10/27", period: "第二節,第三節", place: "校園參觀", minutes: 120, students: "鹿港國中", target: "鹿港國中特殊學生及老師及家長", mainType: "3. 諮詢服務", subType: "3-1 特殊教育諮詢服務", result: "已結案 / 完成", summary: "彰化縣立鹿港國中特教班師生及家長於本日蒞校參訪,活動安排校園無障礙環境導覽、適性實習課程體驗及升學轉銜洽詢,協助學生實地認識學習環境,並解答家長有關安置與支持服務之疑問。" },
+            { id: "10", date: "2026/10/14", period: "第六節,第七節,第八節", place: "第三會議室 6F", minutes: 180, students: "全校老師", target: "普通班導師/教師", mainType: "5. 其它", subType: "5-3 特殊教育宣導", result: "已結案 / 完成", summary: "115學年度第1學期全校教師特教知能研習" },
+            { id: "11", date: "2026/10/07", period: "第五節,第六節", place: "多元教室", minutes: 120, students: "蔣孝美老師", target: "普通班導師/教師", mainType: "3. 諮詢服務", subType: "3-2 課程調整諮詢服務", result: "持續進行", summary: "討論特殊生個別化教學與評量相關事宜。" },
+            { id: "12", date: "2026/10/07", period: "第七節", place: "多元教室", minutes: 60, students: "113 張豐峻,范老師", target: "普通班導師/教師", mainType: "3. 諮詢服務", subType: "3-2 課程調整諮詢服務", result: "持續進行", summary: "討論特殊生個別化教學與評量相關事宜" },
+            { id: "13", date: "2026/10/19", period: "中午,第五節", place: "多元教室", minutes: 120, students: "307 陳睿禎", target: "資源班學生", mainType: "2. 個別晤談與指導", subType: "2-1 個別晤談", result: "持續進行", summary: "陳生因阿婆家陪伴10年的愛犬過世,內心十分難過與不捨,特前來尋求晤談與心理支持。" },
+            { id: "14", date: "2026/10/13", period: "第八節", place: "個諮室", minutes: 60, students: "315 林威成", target: "資源班學生", mainType: "2. 個別晤談與指導", subType: "2-1 個別晤談", result: "持續進行", summary: "了解林生對未來的想法與生涯規劃,過程中探討其個人的興趣、優勢以及對未來發展的期待,並協助其釐清可行目標與具體實踐步驟,鼓勵林生建立自主規劃的能力,後續將持續追蹤其目標執行狀況,提供相應的資源與引導。" },
+            { id: "15", date: "2026/10/14", period: "第五節", place: "學務處", minutes: 60, students: "301廖 宇,301廖 宇媽媽", target: "資源班學生", mainType: "2. 個別晤談與指導", subType: "2-1 個別晤談", result: "持續進行", summary: "深入廖生近期因缺曠課過多及上課時間嚴重睡覺問題,由家長至校協助處理缺曠課與愛校服務相關事宜,並進行三方晤談,晤談過程中,與家長共同釐清廖生的生活作息與出缺勤狀況,並針對其未來的學習與生涯規劃進行深入討論,後續將持續追蹤廖生的課堂參與及作息改善情形,並與家長保持聯繫,共同引導學生建立穩定的學習習慣。" }
         ];
 
         let records = [];
@@ -583,14 +601,34 @@
             }
         }
 
+        // 🔐 安全初始化：優先使用永久 key，若舊版本有紀錄則平滑遷移
         function initApp() {
-            const saved = localStorage.getItem('school_service_records_v8');
+            const masterKey = 'school_service_records_master';
+            const legacyKeys = ['school_service_records_v8', 'school_service_records_v7'];
+
+            let saved = localStorage.getItem(masterKey);
+            if (!saved) {
+                for (let k of legacyKeys) {
+                    const legacyData = localStorage.getItem(k);
+                    if (legacyData) {
+                        saved = legacyData;
+                        localStorage.setItem(masterKey, saved); // 平滑遷移
+                        break;
+                    }
+                }
+            }
+
             if (saved) {
-                records = JSON.parse(saved);
+                try {
+                    records = JSON.parse(saved);
+                } catch (e) {
+                    records = INITIAL_DATA;
+                }
             } else {
                 records = INITIAL_DATA;
                 saveData();
             }
+
             if (document.getElementById('input-date')) {
                 document.getElementById('input-date').valueAsDate = new Date();
             }
@@ -603,8 +641,73 @@
             renderApp();
         }
 
+        function saveData() {
+            localStorage.setItem('school_service_records_master', JSON.stringify(records));
+            updateDatalists();
+        }
+
+        function clearAllData() {
+            if (confirm('⚠️ 警告：確定要清空系統中的所有服務紀錄嗎？\n清空前建議先點擊上方「備份資料」儲存檔案！')) {
+                records = [];
+                saveData();
+                renderApp();
+                if (!document.getElementById('page-indirect-stats').classList.contains('hidden')) {
+                    renderAllCharts();
+                }
+                alert('所有資料已清空！您可以透過「匯入備份」隨時匯入您的紀錄。');
+            }
+        }
+
+        function restorePDFData() {
+            if (confirm('確定要復原為 PDF 預設的 15 筆原始服務紀錄嗎？')) {
+                records = [...INITIAL_DATA];
+                saveData();
+                renderApp();
+                if (!document.getElementById('page-indirect-stats').classList.contains('hidden')) {
+                    renderAllCharts();
+                }
+                alert('已成功復原 PDF 原始資料！');
+            }
+        }
+
+        function triggerImport() {
+            document.getElementById('import-file-input').click();
+        }
+
+        function handleFileImport(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const imported = JSON.parse(evt.target.result);
+                    if (Array.isArray(imported)) {
+                        records = imported;
+                        saveData();
+                        renderApp();
+                        alert(`成功匯入 ${imported.length} 筆服務紀錄！`);
+                    } else {
+                        alert('匯入失敗：檔案格式不符合需求。');
+                    }
+                } catch(err) {
+                    alert('檔案讀取錯誤，請確定匯入的是備份 JSON 檔案。');
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = '';
+        }
+
+        function exportBackupJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(records, null, 2));
+            const link = document.createElement('a');
+            link.href = dataStr;
+            link.download = `間接服務紀錄完整備份_${new Date().toISOString().slice(0,10)}.json`;
+            link.click();
+        }
+
         function updateDatalists() {
-            const defaultPlaces = ['多元教室', '個諮室', '團體諮商室', '輔導室', '多功能會議廳5F', '第一會議室5F', '第三會議室6F'];
+            const defaultPlaces = ['多元教室', '個諮室', '團體諮商室', '輔導室', '學務處', '校園參觀', '多功能會議廳5F', '第一會議室5F', '第三會議室 6F'];
             const recordedPlaces = records.map(r => r.place).filter(Boolean);
             const uniquePlaces = [...new Set([...defaultPlaces, ...recordedPlaces])];
             
@@ -696,11 +799,6 @@
                 return records.filter(r => r.date.startsWith(targetYear));
             }
             return records;
-        }
-
-        function saveData() {
-            localStorage.setItem('school_service_records_v8', JSON.stringify(records));
-            updateDatalists();
         }
 
         function updateSubTypes() {
@@ -876,6 +974,11 @@
 
             const tbody = document.getElementById('table-body');
             if (tbody) {
+                if (records.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-400 font-bold">目前暫無任何間接服務紀錄，您可以點擊上方「復原預設資料」或「匯入備份」！</td></tr>`;
+                    return;
+                }
+
                 tbody.innerHTML = records.map(r => `
                     <tr class="hover:bg-[#C9DCE6]/30 transition">
                         <td class="p-3 font-bold text-[#1F2A36] whitespace-nowrap">
@@ -884,20 +987,17 @@
                         </td>
                         <td class="p-3 font-medium whitespace-nowrap">${r.place || '-'}</td>
                         <td class="p-3 whitespace-nowrap font-black text-[#1F2A36]">${r.minutes} 分</td>
+                        <td class="p-3 max-w-[150px]">
+                            <div class="font-bold text-[#1F2A36] break-words">${r.students}</div>
+                        </td>
+                        <td class="p-3 max-w-[130px]">
+                            <div class="text-xs font-bold text-[#1F2A36] break-words">${r.target}</div>
+                        </td>
                         <td class="p-3 max-w-[160px]">
-                            <div class="font-bold text-[#1F2A36] truncate">${r.students}</div>
-                            <div class="text-xs font-medium text-slate-500 truncate">${r.target}</div>
-                        </td>
-                        <td class="p-3">
                             <div class="inline-block bg-[#C9DCE6] text-[#1F2A36] font-bold text-xs px-2 py-0.5 rounded-md mb-1">${r.mainType}</div>
-                            <div class="text-xs font-medium text-slate-700 truncate">${r.subType}</div>
+                            <div class="text-xs font-medium text-slate-700 break-words">${r.subType}</div>
                         </td>
-                        <td class="p-3 whitespace-nowrap">
-                            <span class="px-2 py-1 rounded-lg text-xs font-bold border ${r.result === '已結案 / 完成' ? 'bg-[#C9DCE6]/60 text-[#1F2A36] border-[#a4c5d6]' : 'bg-[#D7B7C2]/50 text-[#87495b] border-[#D7B7C2]'}">
-                                ${r.result || '持續進行'}
-                            </span>
-                        </td>
-                        <td class="p-3 max-w-xs truncate font-medium text-[#1F2A36]" title="${r.summary}">${r.summary}</td>
+                        <td class="p-3 max-w-xs font-medium text-[#1F2A36] leading-relaxed" title="${r.summary}">${r.summary}</td>
                         <td class="p-3 text-center whitespace-nowrap">
                             <button onclick="editRecord('${r.id}')" class="text-[#1F2A36] hover:text-[#34475a] font-bold p-1.5" title="編輯"><i class="fa-solid fa-pen"></i></button>
                             <button onclick="deleteRecord('${r.id}')" class="text-[#87495b] hover:text-[#5a2f3c] font-bold p-1.5 ml-1" title="刪除"><i class="fa-solid fa-trash"></i></button>
@@ -1232,58 +1332,94 @@
             });
         }
 
+        // 📊 依據 PDF 100% 格式對齊之 CSV 匯出
         function exportCSV() {
-            let csv = "\uFEFF日期,節次,地點,服務分鐘數,服務對象,人員,服務類型,服務項目,服務成效,服務摘要\n";
+            let csv = "\uFEFF日期,節次,地點,時間小計(分鐘),資源班學生/老師/家長,服務對象,間接服務類型與項目,服務內容摘要\n";
             records.forEach(r => {
-                csv += `"${r.date}","${r.period || ''}","${r.place || ''}","${r.minutes}","${r.target}","${r.students}","${r.mainType}","${r.subType}","${r.result || ''}","${(r.summary || '').replace(/"/g, '""')}"\n`;
+                const fullType = `${r.mainType} (${r.subType})`;
+                csv += `"${r.date}","${r.period || ''}","${r.place || ''}","${r.minutes}","${r.students}","${r.target}","${fullType}","${(r.summary || '').replace(/"/g, '""')}"\n`;
             });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = `間接服務紀錄明細_${new Date().toISOString().slice(0,10)}.csv`;
+            link.download = `間接服務紀錄對齊檔_${new Date().toISOString().slice(0,10)}.csv`;
             link.click();
         }
 
+        // 📄 依據 PDF 100% 格式對齊之 Word 備查與簽核報表匯出
         function exportWord() {
+            const totalMins = records.reduce((sum, r) => sum + (parseInt(r.minutes) || 0), 0);
+            const thisMonthPeriods = Math.round(totalMins / 60);
+            const prevMonthPeriods = 6;
+            const totalTermPeriods = prevMonthPeriods + thisMonthPeriods;
+
             let html = `
                 <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
                 <head><meta charset='utf-8'><title>間接服務紀錄報表</title>
                 <style>
-                    body { font-family: '微軟正黑體', sans-serif; font-size: 12pt; }
+                    body { font-family: '微軟正黑體', sans-serif; font-size: 11pt; line-height: 1.4; }
+                    .header-title { font-size: 18pt; font-weight: bold; text-align: center; margin-bottom: 8px; }
                     table { border-collapse: collapse; width: 100%; margin-top: 10px; }
-                    th, td { border: 1px solid #000; padding: 6px; text-align: left; font-size: 12pt; }
-                    th { background-color: #f2f2f2; }
-                    h2 { text-align: center; }
+                    th, td { border: 1px solid #000; padding: 6px 8px; text-align: left; font-size: 10.5pt; vertical-align: middle; }
+                    th { background-color: #f2f2f2; text-align: center; font-weight: bold; }
+                    .center { text-align: center; }
+                    .footer-table td { border: 1px solid #000; padding: 8px; font-weight: bold; }
+                    .sign-table { margin-top: 30px; border: none; }
+                    .sign-table td { border: none; padding: 15px 5px; font-size: 12pt; font-weight: bold; }
                 </style>
                 </head>
                 <body>
-                    <h2>特殊教育間接服務紀錄備查表</h2>
-                    <p>列印日期：${new Date().toLocaleDateString()}</p>
+                    <div class="header-title">115年10月份間接服務</div>
                     <table>
                         <thead>
                             <tr>
-                                <th>日期/節次</th>
-                                <th>地點</th>
-                                <th>時數(分)</th>
-                                <th>對象/人員</th>
-                                <th>服務類型/項目</th>
-                                <th>服務成效</th>
-                                <th>服務摘要</th>
+                                <th style="width: 10%;">日期</th>
+                                <th style="width: 13%;">節次</th>
+                                <th style="width: 11%;">地點</th>
+                                <th style="width: 9%;">時間小計<br>(以分鐘數計算)</th>
+                                <th style="width: 16%;">資源班學生(經鑑定確認及疑似)/老師/家長</th>
+                                <th style="width: 14%;">服務對象</th>
+                                <th style="width: 14%;">間接服務類型</th>
+                                <th style="width: 13%;">服務內容摘要</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${records.map(r => `
                                 <tr>
-                                    <td>${r.date}<br>${r.period || ''}</td>
+                                    <td class="center">${r.date}</td>
+                                    <td>${r.period || ''}</td>
                                     <td>${r.place || ''}</td>
-                                    <td>${r.minutes}</td>
-                                    <td>${r.students}<br>(${r.target})</td>
-                                    <td>${r.mainType}<br>${r.subType}</td>
-                                    <td>${r.result || '持續進行'}</td>
+                                    <td class="center">${r.minutes}</td>
+                                    <td>${r.students}</td>
+                                    <td>${r.target}</td>
+                                    <td>${r.mainType}<br><span style="font-size:9pt; color:#555;">(${r.subType})</span></td>
                                     <td>${r.summary || ''}</td>
                                 </tr>
                             `).join('')}
                         </tbody>
+                    </table>
+
+                    <br>
+                    <!-- PDF 對齊：本月統計與簽核區域 -->
+                    <table class="footer-table">
+                        <tr>
+                            <td style="width: 35%;" class="center">
+                                本月累積分鐘數：${totalMins} 分
+                            </td>
+                            <td style="width: 65%;">
+                                本月服務節數累計：<strong>${thisMonthPeriods} 節</strong><br>
+                                累計至上月服務節數共：<strong>${prevMonthPeriods} 節</strong><br>
+                                至本月為止本學期累計節數共：<strong>${totalTermPeriods} 節</strong> (本學期需執行：20週 × 2 = 40節)
+                            </td>
+                        </tr>
+                    </table>
+
+                    <table class="sign-table" style="width: 100%;">
+                        <tr>
+                            <td style="width: 33%;">資源班導師：</td>
+                            <td style="width: 33%;">處室主管：</td>
+                            <td style="width: 34%;">校長：</td>
+                        </tr>
                     </table>
                 </body>
                 </html>
@@ -1292,7 +1428,7 @@
             const blob = new Blob([html], { type: 'application/msword' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = `間接服務簽核報表_${new Date().toISOString().slice(0,10)}.doc`;
+            link.download = `115年10月份間接服務紀錄報表_${new Date().toISOString().slice(0,10)}.doc`;
             link.click();
         }
     </script>
