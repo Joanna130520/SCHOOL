@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>間接服務系統 (雙頁籤版)</title>
+    <title>間接服務系統 (三頁籤版)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js -->
@@ -67,7 +67,7 @@
 
     <!-- 📱 主要系統區域 -->
     <div id="main-app" class="hidden">
-        <!-- 頂部導覽列與分頁選單 -->
+        <!-- 頂部導覽列與三個分頁選單 -->
         <nav class="bg-[#4a90e2] text-white shadow-sm sticky top-0 z-50">
             <div class="max-w-7xl mx-auto px-4 py-2 flex flex-col md:flex-row justify-between items-center gap-3">
                 <div class="flex items-center space-x-6">
@@ -75,12 +75,15 @@
                         <i class="fa-solid fa-clock-rotate-left text-2xl text-blue-100"></i>
                         <h1 class="text-xl font-bold tracking-wide">間接服務系統</h1>
                     </div>
-                    <!-- 新增 2 個分頁 Tab 按鈕 -->
+                    <!-- 三個分頁 Tab 按鈕 -->
                     <div class="flex space-x-1">
-                        <button id="nav-btn-service" onclick="switchPage('indirect-service')" class="px-4 py-2 rounded-t-lg text-sm transition flex items-center gap-2 nav-tab-active">
-                            <i class="fa-solid fa-hand-holding-hand"></i> 間接服務
+                        <button id="nav-btn-service" onclick="switchPage('indirect-service')" class="px-3.5 py-2 rounded-t-lg text-xs md:text-sm transition flex items-center gap-1.5 nav-tab-active">
+                            <i class="fa-solid fa-pen-to-square"></i> 間接服務
                         </button>
-                        <button id="nav-btn-record" onclick="switchPage('indirect-record')" class="px-4 py-2 rounded-t-lg text-sm transition flex items-center gap-2 hover:bg-white/10">
+                        <button id="nav-btn-stats" onclick="switchPage('indirect-stats')" class="px-3.5 py-2 rounded-t-lg text-xs md:text-sm transition flex items-center gap-1.5 hover:bg-white/10">
+                            <i class="fa-solid fa-chart-pie"></i> 間接服務統計
+                        </button>
+                        <button id="nav-btn-record" onclick="switchPage('indirect-record')" class="px-3.5 py-2 rounded-t-lg text-xs md:text-sm transition flex items-center gap-1.5 hover:bg-white/10">
                             <i class="fa-solid fa-clipboard-list"></i> 間接服務紀錄
                         </button>
                     </div>
@@ -100,15 +103,13 @@
             </div>
         </nav>
 
-        <!-- 主要內容區：包含兩個獨立 Page 區塊 -->
+        <!-- 主要內容區 -->
         <main class="max-w-7xl mx-auto px-4 py-6">
 
-            <!-- PAGE 1: 間接服務頁面 (填寫表單 + 圖表分析) -->
-            <div id="page-indirect-service" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-                <!-- 左側：填寫表單區 -->
-                <section class="lg:col-span-5 bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#7bb4e8]/30 p-5">
-                    <h2 class="text-lg font-bold text-slate-800 border-b border-[#7bb4e8]/20 pb-3 mb-4 flex items-center gap-2">
+            <!-- PAGE 1: 間接服務頁面 (單純表單區) -->
+            <div id="page-indirect-service" class="max-w-3xl mx-auto">
+                <section class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#7bb4e8]/30 p-6">
+                    <h2 class="text-lg font-bold text-slate-800 border-b border-[#7bb4e8]/20 pb-3 mb-5 flex items-center gap-2">
                         <i class="fa-solid fa-pen-to-square text-[#4a90e2]"></i>
                         <span id="form-title">新增間接服務紀錄</span>
                     </h2>
@@ -117,7 +118,7 @@
                         <input type="hidden" id="edit-id" value="">
 
                         <!-- 日期 & 時數 -->
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-600 mb-1">日期</label>
                                 <input type="date" id="input-date" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-[#7bb4e8] outline-none">
@@ -166,7 +167,7 @@
                         <!-- 資源班學生/人員 -->
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 mb-1">資源班學生 / 老師 / 家長</label>
-                            <div class="max-h-32 overflow-y-auto border border-slate-200 rounded-xl p-2 bg-slate-50/50 grid grid-cols-2 gap-1 mb-2" id="student-chips"></div>
+                            <div class="max-h-36 overflow-y-auto border border-slate-200 rounded-xl p-2 bg-slate-50/50 grid grid-cols-2 sm:grid-cols-3 gap-1 mb-2" id="student-chips"></div>
                             <input type="text" id="input-students" placeholder="自訂或補充人員（如：全校老師、許春美老師）" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-[#7bb4e8] outline-none">
                         </div>
 
@@ -186,7 +187,7 @@
                         </div>
 
                         <!-- 間接服務類型 -->
-                        <div class="grid grid-cols-1 gap-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-600 mb-1">間接服務類型 (主類別)</label>
                                 <select id="input-main-type" onchange="updateSubTypes()" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-[#7bb4e8] outline-none bg-white">
@@ -220,126 +221,125 @@
                         </div>
                     </form>
                 </section>
+            </div>
 
-                <!-- 右側：統計報表與圖表 -->
-                <section class="lg:col-span-7 space-y-6">
-                    <!-- 全校總體 KPI 卡片 -->
-                    <div class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#7bb4e8]/30 p-5">
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                                <i class="fa-solid fa-chart-pie text-[#4a90e2]"></i>
-                                <span>全校服務總體統計</span>
-                            </h2>
+            <!-- PAGE 2: 間接服務統計頁面 (獨立呈現統計與圖表) -->
+            <div id="page-indirect-stats" class="hidden space-y-6">
+                <!-- 全校總體 KPI 卡片 -->
+                <div class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#7bb4e8]/30 p-5">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-pie text-[#4a90e2]"></i>
+                            <span>全校服務總體統計</span>
+                        </h2>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="bg-[#d6e8fa]/60 border border-[#7bb4e8]/30 rounded-xl p-3 text-center">
+                            <div class="text-xs text-[#3b72b0] font-medium mb-1">總服務筆數</div>
+                            <div class="text-2xl font-black text-[#3b72b0]" id="kpi-count">0</div>
+                        </div>
+                        <div class="bg-[#e5a9a9]/30 border border-[#e5a9a9]/50 rounded-xl p-3 text-center">
+                            <div class="text-xs text-[#b85b5b] font-medium mb-1">累積總分鐘數</div>
+                            <div class="text-2xl font-black text-[#b85b5b]" id="kpi-minutes">0 <span class="text-xs font-normal">分</span></div>
+                        </div>
+                        <div class="bg-[#d6e8fa]/80 border border-blue-200 rounded-xl p-3 text-center">
+                            <div class="text-xs text-blue-700 font-medium mb-1">折算總節數 (60分/節)</div>
+                            <div class="text-2xl font-black text-blue-700" id="kpi-periods">0 <span class="text-xs font-normal">節</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 雙切換視角卡片：全校學生總表 VS 個別學生需求分析 -->
+                <div class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#e6748e]/40 p-5">
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4 border-b border-slate-100 pb-3">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-users-viewfinder text-[#e6748e] text-lg"></i>
+                            <h2 class="text-md font-bold text-slate-800">學生間接服務需求分析</h2>
+                        </div>
+                        <div class="flex bg-slate-100 p-1 rounded-xl gap-1">
+                            <button type="button" id="btn-mode-all" onclick="switchAnalysisMode('all')" class="px-3 py-1 text-xs font-medium rounded-lg transition bg-[#e6748e] text-white shadow-sm">
+                                📊 全校學生總表
+                            </button>
+                            <button type="button" id="btn-mode-single" onclick="switchAnalysisMode('single')" class="px-3 py-1 text-xs font-medium rounded-lg transition text-slate-600 hover:text-slate-900">
+                                👤 個別學生案件
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="view-all-header" class="mb-3 text-xs text-slate-500 flex justify-between items-center">
+                        <span>顯示每位特教生累積之服務案件筆數與時間 (小時)</span>
+                        <span class="text-[#e6748e] font-semibold">作為全校整體需求輪廓參照</span>
+                    </div>
+
+                    <div id="view-single-controls" class="hidden mb-4">
+                        <div class="flex items-center justify-between mb-3 bg-rose-50/50 p-2.5 rounded-xl border border-rose-100">
+                            <span class="text-xs font-bold text-slate-700">選擇分析對象：</span>
+                            <select id="student-filter" onchange="renderAnalysisChart()" class="px-3 py-1.5 border border-[#e6748e]/40 rounded-xl text-xs font-medium text-slate-700 focus:ring-2 focus:ring-[#e6748e] outline-none bg-white">
+                            </select>
                         </div>
 
                         <div class="grid grid-cols-3 gap-3">
-                            <div class="bg-[#d6e8fa]/60 border border-[#7bb4e8]/30 rounded-xl p-3 text-center">
-                                <div class="text-xs text-[#3b72b0] font-medium mb-1">總服務筆數</div>
-                                <div class="text-2xl font-black text-[#3b72b0]" id="kpi-count">0</div>
+                            <div class="bg-rose-50 border border-rose-100 rounded-xl p-2 text-center">
+                                <div class="text-[10px] text-rose-600 font-medium">該生服務筆數</div>
+                                <div class="text-lg font-bold text-rose-700" id="stu-kpi-count">0</div>
                             </div>
-                            <div class="bg-[#e5a9a9]/30 border border-[#e5a9a9]/50 rounded-xl p-3 text-center">
-                                <div class="text-xs text-[#b85b5b] font-medium mb-1">累積總分鐘數</div>
-                                <div class="text-2xl font-black text-[#b85b5b]" id="kpi-minutes">0 <span class="text-xs font-normal">分</span></div>
+                            <div class="bg-rose-50 border border-rose-100 rounded-xl p-2 text-center">
+                                <div class="text-[10px] text-rose-600 font-medium">累積服務時間</div>
+                                <div class="text-lg font-bold text-rose-700" id="stu-kpi-minutes">0 <span class="text-xs font-normal">分</span></div>
                             </div>
-                            <div class="bg-[#d6e8fa]/80 border border-blue-200 rounded-xl p-3 text-center">
-                                <div class="text-xs text-blue-700 font-medium mb-1">折算總節數 (60分/節)</div>
-                                <div class="text-2xl font-black text-blue-700" id="kpi-periods">0 <span class="text-xs font-normal">節</span></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 雙切換視角卡片：全校學生總表 VS 個別學生需求分析 -->
-                    <div class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#e6748e]/40 p-5">
-                        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4 border-b border-slate-100 pb-3">
-                            <div class="flex items-center gap-2">
-                                <i class="fa-solid fa-users-viewfinder text-[#e6748e] text-lg"></i>
-                                <h2 class="text-md font-bold text-slate-800">學生間接服務需求分析</h2>
-                            </div>
-                            <div class="flex bg-slate-100 p-1 rounded-xl gap-1">
-                                <button type="button" id="btn-mode-all" onclick="switchAnalysisMode('all')" class="px-3 py-1 text-xs font-medium rounded-lg transition bg-[#e6748e] text-white shadow-sm">
-                                    📊 全校學生總表
-                                </button>
-                                <button type="button" id="btn-mode-single" onclick="switchAnalysisMode('single')" class="px-3 py-1 text-xs font-medium rounded-lg transition text-slate-600 hover:text-slate-900">
-                                    👤 個別學生案件
-                                </button>
-                            </div>
-                        </div>
-
-                        <div id="view-all-header" class="mb-3 text-xs text-slate-500 flex justify-between items-center">
-                            <span>顯示每位特教生累積之服務案件筆數與時間 (小時)</span>
-                            <span class="text-[#e6748e] font-semibold">作為全校整體需求輪廓參照</span>
-                        </div>
-
-                        <div id="view-single-controls" class="hidden mb-4">
-                            <div class="flex items-center justify-between mb-3 bg-rose-50/50 p-2.5 rounded-xl border border-rose-100">
-                                <span class="text-xs font-bold text-slate-700">選擇分析對象：</span>
-                                <select id="student-filter" onchange="renderAnalysisChart()" class="px-3 py-1.5 border border-[#e6748e]/40 rounded-xl text-xs font-medium text-slate-700 focus:ring-2 focus:ring-[#e6748e] outline-none bg-white">
-                                </select>
-                            </div>
-
-                            <div class="grid grid-cols-3 gap-3">
-                                <div class="bg-rose-50 border border-rose-100 rounded-xl p-2 text-center">
-                                    <div class="text-[10px] text-rose-600 font-medium">該生服務筆數</div>
-                                    <div class="text-lg font-bold text-rose-700" id="stu-kpi-count">0</div>
-                                </div>
-                                <div class="bg-rose-50 border border-rose-100 rounded-xl p-2 text-center">
-                                    <div class="text-[10px] text-rose-600 font-medium">累積服務時間</div>
-                                    <div class="text-lg font-bold text-rose-700" id="stu-kpi-minutes">0 <span class="text-xs font-normal">分</span></div>
-                                </div>
-                                <div class="bg-rose-50 border border-rose-100 rounded-xl p-2 text-center">
-                                    <div class="text-[10px] text-rose-600 font-medium">建議下學期需求</div>
-                                    <div class="text-lg font-bold text-rose-700" id="stu-kpi-periods">0 <span class="text-xs font-normal">節</span></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="h-56 relative">
-                            <canvas id="chart-analysis"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- 圖表區 -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#7bb4e8]/30 p-4">
-                            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">服務對象分布</h3>
-                            <div class="h-56 relative">
-                                <canvas id="chart-target"></canvas>
-                            </div>
-                            <div id="target-legend" class="mt-3 grid grid-cols-1 gap-1 text-[11px] text-slate-600 border-t border-slate-100 pt-2 max-h-24 overflow-y-auto"></div>
-                        </div>
-
-                        <div class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#7bb4e8]/30 p-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">間接服務類型統計</h3>
-                                <div class="flex bg-slate-100 p-0.5 rounded-lg gap-0.5">
-                                    <button type="button" id="btn-service-main" onclick="switchServiceTypeChart('main')" class="px-2 py-0.5 text-[10px] font-medium rounded transition bg-[#4a90e2] text-white">主項</button>
-                                    <button type="button" id="btn-service-sub" onclick="switchServiceTypeChart('sub')" class="px-2 py-0.5 text-[10px] font-medium rounded transition text-slate-600 hover:text-slate-900">細項</button>
-                                </div>
-                            </div>
-                            <div class="h-64 relative">
-                                <canvas id="chart-type"></canvas>
-                            </div>
-                        </div>
-
-                        <div class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#7bb4e8]/30 p-4">
-                            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">地點時間占比 (小時)</h3>
-                            <div class="h-64 relative">
-                                <canvas id="chart-place"></canvas>
-                            </div>
-                        </div>
-
-                        <div class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#7bb4e8]/30 p-4">
-                            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">每日累積服務時間 (小時)</h3>
-                            <div class="h-64 relative">
-                                <canvas id="chart-daily"></canvas>
+                            <div class="bg-rose-50 border border-rose-100 rounded-xl p-2 text-center">
+                                <div class="text-[10px] text-rose-600 font-medium">建議下學期需求</div>
+                                <div class="text-lg font-bold text-rose-700" id="stu-kpi-periods">0 <span class="text-xs font-normal">節</span></div>
                             </div>
                         </div>
                     </div>
-                </section>
 
+                    <div class="h-64 relative">
+                        <canvas id="chart-analysis"></canvas>
+                    </div>
+                </div>
+
+                <!-- 四大子圖表網格 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#7bb4e8]/30 p-4">
+                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">服務對象分布</h3>
+                        <div class="h-64 relative">
+                            <canvas id="chart-target"></canvas>
+                        </div>
+                        <div id="target-legend" class="mt-3 grid grid-cols-1 gap-1 text-[11px] text-slate-600 border-t border-slate-100 pt-2 max-h-24 overflow-y-auto"></div>
+                    </div>
+
+                    <div class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#7bb4e8]/30 p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">間接服務類型統計</h3>
+                            <div class="flex bg-slate-100 p-0.5 rounded-lg gap-0.5">
+                                <button type="button" id="btn-service-main" onclick="switchServiceTypeChart('main')" class="px-2 py-0.5 text-[10px] font-medium rounded transition bg-[#4a90e2] text-white">主項</button>
+                                <button type="button" id="btn-service-sub" onclick="switchServiceTypeChart('sub')" class="px-2 py-0.5 text-[10px] font-medium rounded transition text-slate-600 hover:text-slate-900">細項</button>
+                            </div>
+                        </div>
+                        <div class="h-64 relative">
+                            <canvas id="chart-type"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#7bb4e8]/30 p-4">
+                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">地點時間占比 (小時)</h3>
+                        <div class="h-64 relative">
+                            <canvas id="chart-place"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#7bb4e8]/30 p-4">
+                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">每日累積服務時間 (小時)</h3>
+                        <div class="h-64 relative">
+                            <canvas id="chart-daily"></canvas>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- PAGE 2: 間接服務紀錄頁面 (歷史紀錄明細) -->
+            <!-- PAGE 3: 間接服務紀錄頁面 (歷史紀錄明細區) -->
             <div id="page-indirect-record" class="hidden">
                 <div class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-[#7bb4e8]/30 p-6">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-100 pb-4 mb-4 gap-3">
@@ -348,7 +348,7 @@
                                 <i class="fa-solid fa-list-check text-[#4a90e2]"></i>
                                 <span>間接服務紀錄明細表</span>
                             </h2>
-                            <p class="text-xs text-slate-500 mt-1">管理並檢視歷史紀錄，提供快速搜尋、排序與資料匯出。</p>
+                            <p class="text-xs text-slate-500 mt-1">管理與檢視歷史紀錄，支援排序與編輯功能。</p>
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="text-xs text-slate-500"><i class="fa-solid fa-arrow-down-short-wide mr-1"></i>依日期排序</span>
@@ -420,7 +420,7 @@
             { id: "3", date: "2026/10/06", period: "第六節, 第七節", place: "多元教室", minutes: 120, students: "113 張O峻, 201 劉O兆", target: "專業團隊 (物理治療、心理治療、職能治療、語言治療)", mainType: "需求評估與處理", subType: "1-4 專業團隊服務的規劃與合作", summary: "語言治療課程" },
             { id: "4", date: "2026/10/12", period: "第六節, 第七節", place: "多元教室", minutes: 120, students: "113 張O峻, 201 劉O兆", target: "專業團隊 (物理治療、心理治療、職能治療、語言治療)", mainType: "需求評估與處理", subType: "1-4 專業團隊服務的規劃與合作", summary: "語言治療課程" },
             { id: "5", date: "2026/10/22", period: "第六節, 第七節", place: "多元教室", minutes: 120, students: "104 許O棠, 110 蔡O昌", target: "專業團隊 (物理治療、心理治療、職能治療、語言治療)", mainType: "需求評估與處理", subType: "1-4 專業團隊服務的規劃與合作", summary: "語言治療課程" },
-            { id: "6", date: "2026/10/19", period: "第三節", place: "多元教室", minutes: 60, students: "102 陳O芯", target: "專業團隊 (物理治療、心理治療、職能治療、語言治療)", mainType: "需求評估與處理", subType: "1-4 專業團隊服務的规划與合作", summary: "物理治療課程" },
+            { id: "6", date: "2026/10/19", period: "第三節", place: "多元教室", minutes: 60, students: "102 陳O芯", target: "專業團隊 (物理治療、心理治療、職能治療、語言治療)", mainType: "需求評估與處理", subType: "1-4 專業團隊服務的規劃與合作", summary: "物理治療課程" },
             { id: "7", date: "2026/10/22", period: "第二節, 第三節, 第四節", place: "第三會議室 6F", minutes: 180, students: "108 黃O瑞, 201 劉O兆", target: "普通班學生", mainType: "其它", subType: "5-3 特殊教育宣導", summary: "入班宣導_國立彰化師範大學教授 - 洪雅惠教授" },
             { id: "8", date: "2026/10/29", period: "第二節, 第三節, 第四節", place: "第三會議室 6F", minutes: 180, students: "102 陳O芯, 207 洪O恩, 209 鄭O煜", target: "普通班學生", mainType: "其它", subType: "5-3 特殊教育宣導", summary: "入班宣導_國立彰化師範大學教授 - 林千惠教授" },
             { id: "9", date: "2026/10/27", period: "第二節, 第三節", place: "校園參觀", minutes: 120, students: "鹿港國中", target: "鹿港國中中轉學生及老師及家長", mainType: "諮詢服務", subType: "3-1 特殊教育諮詢服務", summary: "鹿港國中特教班師生蒞校參訪及轉銜諮詢。" },
@@ -439,7 +439,7 @@
         let currentAnalysisMode = 'all'; 
         let serviceChartMode = 'main'; 
 
-        // 🔑 密碼驗證與初始化
+        // 🔑 密碼驗證
         function checkPassword() {
             const input = document.getElementById('pwd-input').value;
             if (input === TARGET_PASSWORD) {
@@ -465,23 +465,38 @@
             }
         });
 
-        // 🔄 分頁切換 (Tab Switch)
+        // 🔄 三頁籤切換邏輯 (Tab Switch)
         function switchPage(pageId) {
-            const p1 = document.getElementById('page-indirect-service');
-            const p2 = document.getElementById('page-indirect-record');
-            const btn1 = document.getElementById('nav-btn-service');
-            const btn2 = document.getElementById('nav-btn-record');
+            const pService = document.getElementById('page-indirect-service');
+            const pStats = document.getElementById('page-indirect-stats');
+            const pRecord = document.getElementById('page-indirect-record');
+            
+            const btnService = document.getElementById('nav-btn-service');
+            const btnStats = document.getElementById('nav-btn-[#4a90e2]');
+            const btnStatsElem = document.getElementById('nav-btn-stats');
+            const btnRecord = document.getElementById('nav-btn-record');
 
+            // 先全部隱藏與重置選單樣式
+            pService.classList.add('hidden');
+            pStats.classList.add('hidden');
+            pRecord.classList.add('hidden');
+
+            btnService.classList.remove('nav-tab-active');
+            btnStatsElem.classList.remove('nav-tab-active');
+            btnRecord.classList.remove('nav-tab-active');
+
+            // 依目標顯示
             if (pageId === 'indirect-service') {
-                p1.classList.remove('hidden');
-                p2.classList.add('hidden');
-                btn1.classList.add('nav-tab-active');
-                btn2.classList.remove('nav-tab-active');
-            } else {
-                p1.classList.add('hidden');
-                p2.classList.remove('hidden');
-                btn2.classList.add('nav-tab-active');
-                btn1.classList.remove('nav-tab-active');
+                pService.classList.remove('hidden');
+                btnService.classList.add('nav-tab-active');
+            } else if (pageId === 'indirect-stats') {
+                pStats.classList.remove('hidden');
+                btnStatsElem.classList.add('nav-tab-active');
+                // 重新觸發圖表調整大小，避免隱藏切換時的繪製變形
+                renderAllCharts();
+            } else if (pageId === 'indirect-record') {
+                pRecord.classList.remove('hidden');
+                btnRecord.classList.add('nav-tab-active');
             }
         }
 
@@ -597,13 +612,14 @@
             saveData();
             resetForm();
             renderApp();
+            alert('紀錄儲存成功！');
         }
 
         function editRecord(id) {
             const r = records.find(item => item.id === id);
             if (!r) return;
 
-            // 切換至服務頁面編輯
+            // 切換至服務填寫頁面
             switchPage('indirect-service');
 
             document.getElementById('edit-id').value = r.id;
@@ -620,7 +636,6 @@
             updateSubTypes();
             document.getElementById('input-sub-type').value = r.subType;
             document.getElementById('input-summary').value = r.summary;
-
             document.getElementById('input-students').value = r.students || '';
         }
 
@@ -636,7 +651,6 @@
             document.getElementById('record-form').reset();
             document.getElementById('edit-id').value = '';
             document.getElementById('form-title').innerText = "新增間接服務紀錄";
-            document.getElementById('btn-[#e6748e]')
             document.getElementById('btn-submit').innerText = "新增紀錄";
             document.getElementById('btn-cancel').classList.add('hidden');
             selectedPeriods = [];
@@ -646,9 +660,8 @@
             document.getElementById('input-date').valueAsDate = new Date();
         }
 
-        // 📊 渲染系統全貌（統計、明細與圖表）
+        // 📊 渲染數據與視圖
         function renderApp() {
-            // Sort records descending by date
             records.sort((a, b) => new Date(b.date) - new Date(a.date));
 
             // 1. KPI
@@ -660,7 +673,7 @@
             document.getElementById('kpi-minutes').innerHTML = `${totalMinutes} <span class="text-xs font-normal">分</span>`;
             document.getElementById('kpi-periods').innerHTML = `${totalPeriods} <span class="text-xs font-normal">節</span>`;
 
-            // 2. 表格 (Render Table Body)
+            // 2. 歷史紀錄表格
             const tbody = document.getElementById('table-body');
             tbody.innerHTML = records.map(r => `
                 <tr class="hover:bg-blue-50/40 transition">
@@ -686,7 +699,11 @@
                 </tr>
             `).join('');
 
-            // 3. Render Charts
+            // 3. 圖表
+            renderAllCharts();
+        }
+
+        function renderAllCharts() {
             renderAnalysisChart();
             renderTargetChart();
             renderTypeChart();
@@ -694,7 +711,7 @@
             renderDailyChart();
         }
 
-        // 📈 切換模式與圖表渲染
+        // 📈 圖表細節繪製邏輯
         function switchAnalysisMode(mode) {
             currentAnalysisMode = mode;
             const btnAll = document.getElementById('btn-mode-all');
@@ -919,7 +936,7 @@
             });
         }
 
-        // 📤 匯出功能
+        // 📤 匯出 CSV 與 Word
         function exportCSV() {
             let csv = "\uFEFF日期,節次,地點,服務分鐘數,服務對象,人員,服務主類別,服務細項目,服務摘要\n";
             records.forEach(r => {
